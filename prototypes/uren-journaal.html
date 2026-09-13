@@ -1,0 +1,267 @@
+<title>Urenjournaal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=Roboto+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --paper:#eceee7; --sheet:#f7f8f4; --sunk:#e2e5dc;
+    --ink:#1b2530; --ink2:#5a6470; --ink3:#8b939c;
+    --rule:#cbcec4; --rule2:#adb1a6;
+    --brass:#8a6a1f;
+    --moss:#3d6a38; --overdue:#8c2f2a; --open:#7a6a4a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14181a; --sheet:#1b2023; --sunk:#22282b;
+      --ink:#e9ece7; --ink2:#a3ada6; --ink3:#78827c;
+      --rule:#2c3336; --rule2:#414a4d;
+      --brass:#d6ac54;
+      --moss:#75bd66; --overdue:#e07b6f; --open:#c8b083;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181a; --sheet:#1b2023; --sunk:#22282b;
+    --ink:#e9ece7; --ink2:#a3ada6; --ink3:#78827c;
+    --rule:#2c3336; --rule2:#414a4d;
+    --brass:#d6ac54;
+    --moss:#75bd66; --overdue:#e07b6f; --open:#c8b083;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif; font-size:15px; line-height:1.5}
+  .page{max-width:900px; margin:0 auto; padding-inline:16px; padding-block:26px 60px}
+  .mono{font-family:"Roboto Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+
+  header h1{font-family:"Zilla Slab",Georgia,serif; font-weight:700; font-size:30px; margin:0; letter-spacing:-.01em; text-wrap:balance}
+  header p{color:var(--ink2); margin:6px 0 0; max-width:64ch}
+  .stamp{font-family:"Roboto Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--brass)}
+
+  /* quick add */
+  form{margin:22px 0 8px; border:1px solid var(--rule2); background:var(--sheet); border-radius:2px}
+  .qline{display:flex; align-items:stretch}
+  .qline span{font-family:"Roboto Mono",monospace; color:var(--brass); padding:12px 4px 12px 14px; font-size:16px}
+  input#q{
+    flex:1; min-width:0; border:0; background:transparent; color:var(--ink);
+    font-family:"Roboto Mono",ui-monospace,monospace; font-size:15px; padding:12px 10px 12px 2px;
+  }
+  input#q:focus{outline:none}
+  form:focus-within{border-color:var(--brass); box-shadow:0 0 0 3px color-mix(in srgb,var(--brass) 18%,transparent)}
+  button.add{border:0; border-left:1px solid var(--rule); background:transparent; color:var(--brass); font:600 14px "Source Sans 3",sans-serif; padding:0 16px; cursor:pointer}
+  button.add:hover{background:var(--sunk)}
+  .hints{display:flex; flex-wrap:wrap; gap:6px; align-items:center; border-top:1px solid var(--rule); padding:8px 12px}
+  .hints em{font-style:normal; color:var(--ink3); font-size:12.5px; margin-right:2px}
+  .ex{font-family:"Roboto Mono",monospace; font-size:12px; background:var(--sunk); border:1px solid var(--rule); color:var(--ink2); border-radius:2px; padding:2px 7px; cursor:pointer}
+  .ex:hover{color:var(--ink); border-color:var(--rule2)}
+  .err{color:var(--overdue); font-size:13px; padding:0 12px 9px; margin:0}
+
+  /* aging */
+  .aging{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--rule2); border:1px solid var(--rule2); border-radius:2px; margin:20px 0 6px}
+  @media (max-width:560px){ .aging{grid-template-columns:repeat(2,1fr)} }
+  .cell{background:var(--sheet); padding:10px 12px 12px}
+  .cell h2{font-family:"Roboto Mono",monospace; font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); margin:0 0 4px}
+  .cell .v{font-family:"Roboto Mono",monospace; font-weight:700; font-size:21px; letter-spacing:-.02em}
+  .cell .n{font-size:12px; color:var(--ink3)}
+  .cell.late .v{color:var(--overdue)}
+  .cell.tot{background:var(--sunk)}
+
+  /* tape */
+  .tape{border:1px solid var(--rule2); background:var(--sheet); border-radius:2px; overflow-x:auto}
+  table{width:100%; border-collapse:collapse; min-width:680px}
+  caption{text-align:left; font-family:"Roboto Mono",monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); padding:10px 14px 4px}
+  thead th{
+    font-family:"Roboto Mono",monospace; font-weight:500; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink2); text-align:left; padding:6px 10px; border-bottom:1px solid var(--rule2); white-space:nowrap;
+  }
+  thead th.r,td.r{text-align:right}
+  tbody td{padding:7px 10px; border-bottom:1px solid var(--rule); vertical-align:baseline}
+  tbody tr:hover td{background:var(--sunk)}
+  tr.mhead td{background:var(--sunk); border-bottom:1px solid var(--rule2)}
+  tr.mhead b{font-family:"Zilla Slab",Georgia,serif; font-size:14px; letter-spacing:.01em}
+  tr.mhead span{font-family:"Roboto Mono",monospace; font-size:12px; color:var(--ink2); float:right}
+  .d{font-family:"Roboto Mono",monospace; font-size:13px; color:var(--ink2); white-space:nowrap}
+  .pj{font-weight:600}
+  .pj small{display:block; font-weight:400; color:var(--ink3); font-size:12px}
+  .h,.rt,.amt{font-family:"Roboto Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .amt{font-weight:500}
+  .rt.up{color:var(--brass)}
+  .rt.up::after{content:" \2191"}
+  .bal{font-family:"Roboto Mono",monospace; font-variant-numeric:tabular-nums; color:var(--ink2); border-left:1px solid var(--rule)}
+  .pill{
+    font-family:"Roboto Mono",monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    border:1px solid currentColor; border-radius:2px; background:transparent; padding:2px 6px; cursor:pointer; white-space:nowrap;
+  }
+  .pill.unbilled{color:var(--open)} .pill.invoiced{color:var(--brass)} .pill.paid{color:var(--moss)} .pill.late{color:var(--overdue)}
+  .pill:focus-visible,input#q:focus-visible,.ex:focus-visible{outline:2px solid var(--brass); outline-offset:2px}
+  .inv{font-family:"Roboto Mono",monospace; font-size:11px; color:var(--ink3); display:block}
+  tfoot td{padding:10px; border-top:1px solid var(--rule2); font-family:"Roboto Mono",monospace; font-weight:700; font-variant-numeric:tabular-nums}
+  tfoot .lbl{font-weight:500; color:var(--ink2); letter-spacing:.06em; text-transform:uppercase; font-size:10.5px}
+  .legend{color:var(--ink3); font-size:12.5px; margin:10px 2px 0}
+</style>
+
+<div class="page">
+  <header>
+    <p class="stamp">boekjaar 2026 &middot; stand 13 september</p>
+    <h1>Urenjournaal</h1>
+    <p>One line per stretch of work, typed the way you would say it out loud. The right column is the one that matters: how much is still owed to you after that line.</p>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <div class="qline">
+      <span>&rsaquo;</span>
+      <input id="q" name="q" placeholder="13/9 3.5 NLS avondwerk @130" aria-label="Nieuwe regel">
+      <button class="add" type="submit">Boek</button>
+    </div>
+    <div class="hints">
+      <em>voorbeelden</em>
+      <button class="ex" type="button">13/9 4 NLS seizoensmenu online</button>
+      <button class="ex" type="button">12/9 2.5 ORC @150 nachtelijke migratie</button>
+      <button class="ex" type="button">11/9 6 HRB webshop import</button>
+    </div>
+    <p class="err" id="err" hidden></p>
+  </form>
+
+  <section class="aging" id="aging" aria-label="Openstaand per ouderdom"></section>
+
+  <div class="tape">
+    <table>
+      <caption>journaal &middot; nieuwste eerst</caption>
+      <thead>
+        <tr>
+          <th>datum</th><th>project</th><th class="r">uren</th><th class="r">tarief</th>
+          <th class="r">bedrag</th><th>status</th><th class="r">openstaand na</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+      <tfoot id="foot"></tfoot>
+    </table>
+  </div>
+  <p class="legend">Click a status to move it on: te factureren &rarr; factuur verstuurd &rarr; betaald. A rate above the project default is marked &uarr;.</p>
+</div>
+
+<script>
+const PROJECTS=[
+  {code:"NLS",name:"Northside School site",client:"Northside School",rate:90},
+  {code:"HRB",name:"Harbour Bakery shop",client:"Harbour Bakery",rate:80},
+  {code:"ORC",name:"Orchard billing API",client:"Orchard Hosting",rate:100},
+  {code:"TIN",name:"Tinsmith mail server",client:"Tinsmith Studio",rate:70}
+];
+const TODAY=new Date(2026,8,13);
+const MONTHS=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+let seq=100;
+let entries=[
+  {id:++seq,date:"2026-07-02",code:"HRB",hours:6,rate:80,note:"nieuwe webshop opzet",status:"invoiced",inv:"2026-011",sent:"2026-07-31"},
+  {id:++seq,date:"2026-07-03",code:"HRB",hours:4,rate:80,note:"import oude paginas",status:"invoiced",inv:"2026-011",sent:"2026-07-31"},
+  {id:++seq,date:"2026-07-09",code:"TIN",hours:3,rate:100,note:"noodherstart na schijffout",status:"invoiced",inv:"2026-011",sent:"2026-07-31"},
+  {id:++seq,date:"2026-08-04",code:"NLS",hours:7.5,rate:90,note:"klantenlijst invoeren",status:"paid",inv:"2026-012",sent:"2026-08-14"},
+  {id:++seq,date:"2026-08-05",code:"NLS",hours:5,rate:90,note:"menukaarten drukken",status:"paid",inv:"2026-012",sent:"2026-08-14"},
+  {id:++seq,date:"2026-08-19",code:"ORC",hours:8,rate:100,note:"facturatiekoppeling",status:"invoiced",inv:"2026-013",sent:"2026-08-31"},
+  {id:++seq,date:"2026-08-20",code:"ORC",hours:3,rate:150,note:"weekendtest met de klant",status:"invoiced",inv:"2026-013",sent:"2026-08-31"},
+  {id:++seq,date:"2026-09-01",code:"NLS",hours:4,rate:90,note:"logboek bijwerken",status:"unbilled"},
+  {id:++seq,date:"2026-09-03",code:"HRB",hours:4,rate:80,note:"redesign doorlopen",status:"unbilled"},
+  {id:++seq,date:"2026-09-08",code:"TIN",hours:2,rate:100,note:"avondmigratie mail",status:"unbilled"},
+  {id:++seq,date:"2026-09-10",code:"NLS",hours:5,rate:90,note:"bulkimport 400 artikelen",status:"unbilled"},
+  {id:++seq,date:"2026-09-12",code:"ORC",hours:3,rate:100,note:"validatierapport",status:"unbilled"}
+];
+
+const proj=c=>PROJECTS.find(p=>p.code===c);
+const eur=n=>"€"+n.toLocaleString("nl-BE",{minimumFractionDigits:0,maximumFractionDigits:0});
+const amount=e=>e.hours*e.rate;
+const days=iso=>Math.round((TODAY-new Date(iso))/86400000);
+const fmt=iso=>{const d=new Date(iso); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")};
+const LABEL={unbilled:"te factureren",invoiced:"verstuurd",paid:"betaald"};
+
+function bucketOf(e){
+  if(e.status==="paid") return null;
+  if(e.status==="unbilled") return "todo";
+  const d=days(e.sent||e.date);
+  return d<=30?"d30":d<=60?"d60":"d60plus";
+}
+
+function render(){
+  entries.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.id-b.id);
+  // running balance: what is still owed to you once this line is counted
+  let running=0;
+  const withBal=entries.map(e=>{
+    if(e.status!=="paid") running+=amount(e);
+    return {e:e,bal:running};
+  });
+
+  const rows=[];
+  let month=null;
+  withBal.slice().reverse().forEach(r=>{
+    const e=r.e, m=e.date.slice(0,7);
+    if(m!==month){
+      month=m;
+      const mtot=entries.filter(x=>x.date.slice(0,7)===m).reduce((s,x)=>s+amount(x),0);
+      const mh=entries.filter(x=>x.date.slice(0,7)===m).reduce((s,x)=>s+x.hours,0);
+      rows.push('<tr class="mhead"><td colspan="7"><b>'+MONTHS[+m.slice(5)-1]+" "+m.slice(0,4)+
+        "</b><span>"+mh.toString().replace(".",",")+"u · "+eur(mtot)+"</span></td></tr>");
+    }
+    const p=proj(e.code), late=bucketOf(e)==="d60plus", cls=late?"late":e.status;
+    rows.push('<tr><td class="d">'+fmt(e.date)+"</td>"+
+      '<td class="pj">'+p.code+" <small>"+e.note+"</small></td>"+
+      '<td class="r h">'+String(e.hours).replace(".",",")+"u</td>"+
+      '<td class="r rt'+(e.rate>p.rate?" up":"")+'">'+eur(e.rate)+"</td>"+
+      '<td class="r amt">'+eur(amount(e))+"</td>"+
+      "<td><button class=\"pill "+cls+'" type="button" data-id="'+e.id+'">'+
+        (late?"te laat":LABEL[e.status])+"</button>"+
+        (e.inv?'<span class="inv">fact. '+e.inv+" · "+days(e.sent)+" d</span>":"")+"</td>"+
+      '<td class="r bal">'+eur(r.bal)+"</td></tr>");
+  });
+  document.getElementById("rows").innerHTML=rows.join("");
+
+  const open=entries.filter(e=>e.status!=="paid").reduce((s,e)=>s+amount(e),0);
+  const paid=entries.filter(e=>e.status==="paid").reduce((s,e)=>s+amount(e),0);
+  const hrs=entries.reduce((s,e)=>s+e.hours,0);
+  document.getElementById("foot").innerHTML=
+    '<tr><td class="lbl" colspan="2">totaal 2026</td><td class="r">'+hrs.toString().replace(".",",")+"u</td>"+
+    '<td class="r lbl">gem. '+eur(Math.round((open+paid)/hrs))+"</td>"+
+    '<td class="r">'+eur(open+paid)+'</td><td class="lbl">betaald '+eur(paid)+"</td>"+
+    '<td class="r" style="color:var(--brass)">'+eur(open)+"</td></tr>";
+
+  const b={todo:0,d30:0,d60:0,d60plus:0}, c={todo:0,d30:0,d60:0,d60plus:0};
+  entries.forEach(e=>{const k=bucketOf(e); if(k){b[k]+=amount(e); c[k]++;}});
+  document.getElementById("aging").innerHTML=
+    cellHTML("nog te factureren",b.todo,c.todo+" regels",false)+
+    cellHTML("verstuurd, 0–30 d",b.d30,c.d30+" regels",false)+
+    cellHTML("31–60 d",b.d60,c.d60+" regels",false)+
+    cellHTML("ouder dan 60 d",b.d60plus,c.d60plus+" regels · bel ze op",true);
+}
+
+function cellHTML(t,v,n,late){
+  return '<div class="cell'+(late&&v?" late":"")+'"><h2>'+t+'</h2><div class="v">'+eur(v)+'</div><div class="n">'+n+"</div></div>";
+}
+
+function parse(s){
+  let t=s.trim().split(/\s+/), date=null, hours=null, code=null, rate=null, note=[];
+  t.forEach(w=>{
+    let m;
+    if(!date&&(m=w.match(/^(\d{1,2})[\/-](\d{1,2})$/))) { date="2026-"+String(+m[2]).padStart(2,"0")+"-"+String(+m[1]).padStart(2,"0"); return; }
+    if(/^@\d+$/.test(w)){ rate=+w.slice(1); return; }
+    if(hours===null&&(m=w.match(/^(\d+(?:[.,]\d+)?)u?$/))){ hours=parseFloat(m[1].replace(",",".")); return; }
+    if(!code&&proj(w.toUpperCase())){ code=w.toUpperCase(); return; }
+    note.push(w);
+  });
+  if(!date) date="2026-09-13";
+  if(hours===null) return {error:"Hoeveel uren? Zet er een getal in, bijvoorbeeld 3,5."};
+  if(!code) return {error:"Welk project? Gebruik "+PROJECTS.map(p=>p.code).join(", ")+"."};
+  return {entry:{id:++seq,date:date,code:code,hours:hours,rate:rate||proj(code).rate,note:note.join(" ")||"geen omschrijving",status:"unbilled"}};
+}
+
+document.getElementById("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const q=document.getElementById("q"), err=document.getElementById("err");
+  if(!q.value.trim()) return;
+  const r=parse(q.value);
+  if(r.error){ err.textContent=r.error; err.hidden=false; return; }
+  err.hidden=true; entries.push(r.entry); q.value=""; render();
+});
+document.querySelectorAll(".ex").forEach(b=>b.addEventListener("click",()=>{
+  const q=document.getElementById("q"); q.value=b.textContent; q.focus();
+}));
+document.getElementById("rows").addEventListener("click",e=>{
+  const b=e.target.closest(".pill"); if(!b) return;
+  const en=entries.find(x=>x.id===+b.dataset.id), order=["unbilled","invoiced","paid"];
+  en.status=order[(order.indexOf(en.status)+1)%3];
+  if(en.status==="invoiced"&&!en.inv){ en.inv="2026-014"; en.sent="2026-09-13"; }
+  render();
+});
+render();
+</script>

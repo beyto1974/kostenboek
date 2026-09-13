@@ -1,0 +1,229 @@
+<title>Wie moet mij betalen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Spline+Sans+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --bg:#f2f4f2; --panel:#ffffff; --panel2:#e8ebe8; --edge:#d2d8d3; --edge2:#b3bcb5;
+    --ink:#111917; --ink2:#4e5a55; --ink3:#7e8a85;
+    --teal:#0e6f66; --teal-soft:#d3e6e3;
+    --unbilled:#6f7c77; --invoiced:#b07d12; --paid:#0e6f66; --late:#a52347;
+    --shadow:0 1px 2px rgba(17,25,23,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d1211; --panel:#151c1a; --panel2:#1d2624; --edge:#26302d; --edge2:#38443f;
+      --ink:#e8efec; --ink2:#a0aeaa; --ink3:#74827d;
+      --teal:#43c9b8; --teal-soft:#14332f;
+      --unbilled:#8e9b96; --invoiced:#e2b548; --paid:#43c9b8; --late:#f2708f;
+      --shadow:none;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d1211; --panel:#151c1a; --panel2:#1d2624; --edge:#26302d; --edge2:#38443f;
+    --ink:#e8efec; --ink2:#a0aeaa; --ink3:#74827d;
+    --teal:#43c9b8; --teal-soft:#14332f;
+    --unbilled:#8e9b96; --invoiced:#e2b548; --paid:#43c9b8; --late:#f2708f;
+    --shadow:none;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Archivo,system-ui,sans-serif; font-size:14.5px; line-height:1.45}
+  .app{max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:20px 56px; display:flex; flex-direction:column; gap:16px}
+  .num{font-family:"Spline Sans Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+  h1{font-size:19px; font-weight:800; margin:0; letter-spacing:-.015em}
+  .top{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px}
+  .top p{margin:0; color:var(--ink2); font-size:13px}
+  .eyebrow{font-family:"Spline Sans Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3)}
+
+  /* headline money */
+  .money{display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:12px}
+  @media (max-width:820px){ .money{grid-template-columns:1fr 1fr} .money .hero{grid-column:1/-1} }
+  @media (max-width:460px){ .money{grid-template-columns:1fr} }
+  .fact{background:var(--panel); border:1px solid var(--edge); border-radius:8px; padding:14px 16px 15px; box-shadow:var(--shadow)}
+  .fact h2{font-size:11px; font-family:"Spline Sans Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin:0 0 7px; font-weight:500}
+  .fact .v{font-family:"Spline Sans Mono",monospace; font-weight:700; font-size:30px; letter-spacing:-.03em; line-height:1.05}
+  .fact .n{font-size:12.5px; color:var(--ink3); margin-top:3px}
+  .hero{background:linear-gradient(180deg,var(--teal-soft),var(--panel) 60%); border-color:var(--edge2)}
+  .hero .v{font-size:42px}
+  .fact.warn .v{color:var(--late)}
+  .spark{margin-top:12px; display:block; width:100%; height:52px}
+
+  /* today strip */
+  .today{background:var(--panel); border:1px solid var(--edge); border-radius:8px; padding:12px 14px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:var(--shadow)}
+  .today .lead{display:flex; flex-direction:column; min-width:150px}
+  .today .lead b{font-size:15px}
+  .today .lead span{font-size:12.5px; color:var(--ink3)}
+  .logrow{display:flex; flex-wrap:wrap; gap:8px; flex:1}
+  .logset{display:flex; align-items:center; border:1px solid var(--edge); border-radius:7px; overflow:hidden; background:var(--panel2)}
+  .logset .code{font-family:"Spline Sans Mono",monospace; font-size:11.5px; font-weight:700; padding:0 9px; letter-spacing:.04em}
+  .logset button{
+    border:0; border-left:1px solid var(--edge); background:transparent; color:var(--ink2);
+    font:500 12px/1 Archivo,sans-serif; padding:8px 9px; cursor:pointer;
+  }
+  .logset button:hover{background:var(--teal); color:#fff}
+  .logset button.eve{color:var(--invoiced)}
+  .logset button:focus-visible,.act:focus-visible{outline:2px solid var(--teal); outline-offset:2px}
+
+  /* project panels */
+  .grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+  @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+  .card{background:var(--panel); border:1px solid var(--edge); border-radius:8px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow)}
+  .card.attention{border-left:3px solid var(--late)}
+  .chead{display:flex; justify-content:space-between; align-items:start; gap:10px}
+  .chead b{font-size:15.5px; font-weight:600; display:block}
+  .chead span{font-size:12.5px; color:var(--ink3)}
+  .rates{font-family:"Spline Sans Mono",monospace; font-size:12px; color:var(--ink2); text-align:right; white-space:nowrap}
+  .rates i{font-style:normal; color:var(--invoiced)}
+  .stack{height:10px; display:flex; border-radius:20px; overflow:hidden; background:var(--panel2)}
+  .stack i{display:block}
+  .legend{display:flex; flex-wrap:wrap; gap:10px 14px}
+  .lg{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink2)}
+  .lg .dot{width:8px; height:8px; border-radius:50%}
+  .lg b{font-family:"Spline Sans Mono",monospace; color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums}
+  .cfoot{display:flex; justify-content:space-between; align-items:center; gap:10px; border-top:1px solid var(--edge); padding-top:10px; margin-top:auto}
+  .cfoot .hrs{font-family:"Spline Sans Mono",monospace; font-size:12.5px; color:var(--ink2)}
+  .act{border:1px solid var(--teal); color:var(--teal); background:transparent; border-radius:6px; font:500 12.5px Archivo,sans-serif; padding:6px 11px; cursor:pointer}
+  .act:hover:not([disabled]){background:var(--teal); color:#fff}
+  .act[disabled]{opacity:.4; cursor:default}
+  .flag{font-family:"Spline Sans Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--late); border:1px solid currentColor; border-radius:3px; padding:1px 6px}
+
+  /* aging */
+  .aging{background:var(--panel); border:1px solid var(--edge); border-radius:8px; box-shadow:var(--shadow); overflow-x:auto}
+  .aging h2{font-size:11px; font-family:"Spline Sans Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin:0; padding:13px 15px 7px; font-weight:500}
+  table{width:100%; border-collapse:collapse; min-width:520px}
+  th{font-family:"Spline Sans Mono",monospace; font-weight:500; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); text-align:left; padding:6px 15px; border-bottom:1px solid var(--edge)}
+  td{padding:9px 15px; border-bottom:1px solid var(--edge); font-size:13.5px}
+  tr:last-child td{border-bottom:0}
+  th.r,td.r{text-align:right}
+  .agebar{height:6px; border-radius:20px; background:var(--invoiced); display:block}
+  .agebar.old{background:var(--late)}
+  footer{color:var(--ink3); font-size:12.5px}
+</style>
+
+<div class="app">
+  <div class="top">
+    <div>
+      <p class="eyebrow">zondag 13 september 2026</p>
+      <h1>Wie moet mij betalen</h1>
+    </div>
+    <p>Hours are the input; the amount owed is the point. Log with one tap, watch the debt column.</p>
+  </div>
+
+  <section class="money" id="money"></section>
+
+  <section class="today">
+    <div class="lead">
+      <b id="tlead">Vandaag: 0u geboekt</b>
+      <span id="tsub">Tik een blok bij een project</span>
+    </div>
+    <div class="logrow" id="logrow"></div>
+  </section>
+
+  <section class="grid" id="cards"></section>
+
+  <section class="aging">
+    <h2>openstaande facturen</h2>
+    <table>
+      <thead><tr><th>factuur</th><th>klant</th><th class="r">bedrag</th><th class="r">dagen</th><th>ouderdom</th></tr></thead>
+      <tbody id="invrows"></tbody>
+    </table>
+  </section>
+
+  <footer>Betaaltermijn 30 dagen. Bedragen exclusief 21% btw. Example figures from a month of freelance work.</footer>
+</div>
+
+<script>
+const PROJECTS=[
+  {code:"NLS",name:"Northside School site",client:"Northside School",rate:90,premium:140,unbilled:855,invoiced:0,paid:1187.5,hours:9},
+  {code:"HRB",name:"Harbour Bakery shop",client:"Harbour Bakery",rate:80,premium:120,unbilled:340,invoiced:850,paid:0,hours:4},
+  {code:"ORC",name:"Orchard billing API",client:"Orchard Hosting",rate:100,premium:150,unbilled:330,invoiced:1330,paid:0,hours:3},
+  {code:"TIN",name:"Tinsmith mail server",client:"Tinsmith Studio",rate:70,premium:100,unbilled:210,invoiced:315,paid:0,hours:2}
+];
+const INVOICES=[
+  {ref:"2026-011",client:"Harbour Bakery",amount:850,sent:"2026-07-31"},
+  {ref:"2026-011b",client:"Tinsmith Studio",amount:315,sent:"2026-07-31"},
+  {ref:"2026-013",client:"Orchard Hosting",amount:1330,sent:"2026-08-31"}
+];
+const WEEKS=[1420,980,1665,760,1210,0,1520,1340,890,1705,1130,1405];
+const TODAY=new Date(2026,8,13);
+let todayHours=0, todayLog=[];
+
+const eur=n=>"€"+Math.round(n).toLocaleString("nl-BE");
+const days=iso=>Math.round((TODAY-new Date(iso))/86400000);
+const sum=(k)=>PROJECTS.reduce((s,p)=>s+p[k],0);
+const hrs=n=>String(n).replace(".",",")+"u";
+
+function spark(){
+  const w=100,h=52,max=Math.max.apply(null,WEEKS),bw=w/WEEKS.length;
+  const bars=WEEKS.map((v,i)=>{
+    const bh=max?v/max*(h-14):0;
+    return '<rect x="'+(i*bw+bw*.14).toFixed(2)+'" y="'+(h-bh).toFixed(2)+'" width="'+(bw*.72).toFixed(2)+
+      '" height="'+Math.max(bh,1).toFixed(2)+'" rx="0.8" fill="'+(i===WEEKS.length-1?"var(--teal)":"var(--edge2)")+'"></rect>';
+  }).join("");
+  return '<svg class="spark" viewBox="0 0 100 52" preserveAspectRatio="none" role="img" aria-label="Omzet per week, laatste 12 weken">'+
+    bars+'<text x="0" y="8" font-size="5" fill="var(--ink3)" font-family="Spline Sans Mono, monospace">12 weken · piek '+eur(max)+"</text></svg>";
+}
+
+function render(){
+  const unb=sum("unbilled"), inv=sum("invoiced"), paid=sum("paid");
+  const late=INVOICES.filter(i=>days(i.sent)>30).reduce((s,i)=>s+i.amount,0);
+  document.getElementById("money").innerHTML=
+    '<div class="fact hero"><h2>staat open op mijn naam</h2><div class="v num">'+eur(unb+inv)+"</div>"+
+      '<div class="n">'+eur(inv)+" gefactureerd · "+eur(unb)+" nog niet verstuurd</div>"+spark()+"</div>"+
+    '<div class="fact warn"><h2>te laat (&gt;30 d)</h2><div class="v num">'+eur(late)+"</div>"+
+      '<div class="n">'+INVOICES.filter(i=>days(i.sent)>30).length+" facturen over termijn</div></div>"+
+    '<div class="fact"><h2>binnengekomen in 2026</h2><div class="v num">'+eur(paid)+"</div>"+
+      '<div class="n">gemiddeld '+eur(1043)+" per week</div></div>";
+
+  document.getElementById("logrow").innerHTML=PROJECTS.map(p=>
+    '<div class="logset"><span class="code">'+p.code+"</span>"+
+      '<button type="button" data-c="'+p.code+'" data-h="0.5">+30m</button>'+
+      '<button type="button" data-c="'+p.code+'" data-h="1">+1u</button>'+
+      '<button type="button" data-c="'+p.code+'" data-h="4">+4u</button>'+
+      '<button type="button" class="eve" data-c="'+p.code+'" data-h="1" data-p="1">+1u avond</button></div>').join("");
+
+  document.getElementById("cards").innerHTML=PROJECTS.map(p=>{
+    const tot=p.unbilled+p.invoiced+p.paid||1;
+    const oldest=INVOICES.filter(i=>i.client===p.client).map(i=>days(i.sent)).sort((a,b)=>b-a)[0];
+    const attention=oldest>30;
+    return '<article class="card'+(attention?" attention":"")+'">'+
+      '<div class="chead"><div><b>'+p.name+"</b><span>"+p.client+"</span></div>"+
+        '<div class="rates">'+eur(p.rate)+"/u<br><i>"+eur(p.premium)+" avond</i></div></div>"+
+      '<div class="stack">'+
+        '<i style="width:'+(p.paid/tot*100)+'%;background:var(--paid)"></i>'+
+        '<i style="width:'+(p.invoiced/tot*100)+'%;background:var(--invoiced)"></i>'+
+        '<i style="width:'+(p.unbilled/tot*100)+'%;background:var(--unbilled)"></i></div>'+
+      '<div class="legend">'+
+        lg("var(--paid)","betaald",p.paid)+lg("var(--invoiced)","wacht op geld",p.invoiced)+lg("var(--unbilled)","te factureren",p.unbilled)+
+      "</div>"+
+      '<div class="cfoot"><span class="hrs">'+hrs(p.hours)+" deze maand"+
+        (attention?' · <span class="flag">'+oldest+" dagen</span>":"")+"</span>"+
+        '<button class="act" type="button" data-bill="'+p.code+'"'+(p.unbilled?"":" disabled")+">Factureer "+eur(p.unbilled)+"</button></div>"+
+    "</article>";
+  }).join("");
+
+  document.getElementById("invrows").innerHTML=INVOICES.map(i=>{
+    const d=days(i.sent), old=d>30;
+    return '<tr><td class="num">'+i.ref+"</td><td>"+i.client+'</td><td class="r num">'+eur(i.amount)+
+      '</td><td class="r num"'+(old?' style="color:var(--late)"':"")+">"+d+'</td><td style="min-width:110px">'+
+      '<i class="agebar'+(old?" old":"")+'" style="width:'+Math.min(d/90*100,100).toFixed(0)+'%"></i></td></tr>';
+  }).join("");
+
+  document.getElementById("tlead").textContent="Vandaag: "+hrs(todayHours)+" geboekt";
+  document.getElementById("tsub").textContent=todayLog.length?todayLog.join(" · "):"Tik een blok bij een project";
+}
+function lg(c,l,v){return '<span class="lg"><span class="dot" style="background:'+c+'"></span>'+l+" <b>"+eur(v)+"</b></span>";}
+
+document.getElementById("logrow").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-c]"); if(!b) return;
+  const p=PROJECTS.find(x=>x.code===b.dataset.c), h=parseFloat(b.dataset.h), rate=b.dataset.p?p.premium:p.rate;
+  p.unbilled+=h*rate; p.hours+=h; todayHours+=h;
+  todayLog.push(p.code+" "+hrs(h)+" × "+eur(rate));
+  render();
+});
+document.getElementById("cards").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-bill]"); if(!b) return;
+  const p=PROJECTS.find(x=>x.code===b.dataset.bill); if(!p.unbilled) return;
+  INVOICES.push({ref:"2026-0"+(14+INVOICES.length-3),client:p.client,amount:Math.round(p.unbilled),sent:"2026-09-13"});
+  p.invoiced+=p.unbilled; p.unbilled=0; render();
+});
+render();
+</script>

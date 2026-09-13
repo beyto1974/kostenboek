@@ -15,6 +15,13 @@ describe('reading the address bar', () => {
     expect(readLocation('?')).toEqual({ view: 'calendar' });
   });
 
+  it('reads the year overview', () => {
+    expect(readLocation('?view=year&month=2026-09')).toEqual({
+      view: 'year',
+      month: '2026-09'
+    });
+  });
+
   it('ignores a tab, a month or a day it cannot make sense of', () => {
     expect(readLocation('?view=gantt')).toEqual({ view: 'calendar' });
     expect(readLocation('?view=matrix&month=octobre')).toEqual({ view: 'matrix' });

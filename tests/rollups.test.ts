@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { eachMonthOfYear } from '../src/domain/dates';
 import { fromEuros } from '../src/domain/money';
-import { aging, dayBlocks, dayTally, monthTotals, rateFor, weekTallies } from '../src/domain/rollups';
+import {
+  aging,
+  dayBlocks,
+  dayTally,
+  emptyYearTotals,
+  monthTotals,
+  rateFor,
+  weekTallies,
+  yearTotals
+} from '../src/domain/rollups';
 import { exampleBook, tinsmith } from './fixtures';
 
 describe('rates', () => {
@@ -115,5 +125,92 @@ describe('how old the money is', () => {
     const buckets = aging(exampleBook(), '2026-12-31');
     expect(buckets.over60).toBe(fromEuros(400));
     expect(buckets.unbilled).toBe(fromEuros(200));
+  });
+});
+
+/** The example fortnight, plus a day the October after it, so a year has to span. */
+function twoMonths() {
+  const book = exampleBook();
+  return {
+    ...book,
+    slots: {
+      ...book.slots,
+      '2026-10-05T09': { projectId: 'tin', kind: 'standard' as const, rate: fromEuros(80) },
+      '2026-10-05T10': { projectId: 'tin', kind: 'standard' as const, rate: fromEuros(80) },
+      '2025-12-31T09': { projectId: 'nls', kind: 'standard' as const, rate: fromEuros(100) }
+    },
+    days: { ...book.days, '2026-10-05': { status: 'paid' as const } }
+  };
+}
+
+describe('a year', () => {
+  it('adds up hours, money and VAT over all twelve months', () => {
+    const year = yearTotals(exampleBook(), '2026');
+
+    expect(year.year).toBe('2026');
+    expect(year.hours).toBe(9);
+    expect(year.amount).toBe(fromEuros(900));
+    expect(year.vat).toBe(Math.round(year.amount * 0.21));
+    expect(year.gross).toBe(year.amount + year.vat);
+    expect(year.averageRate).toBe(Math.round(year.amount / year.hours));
+  });
+
+  it('sums across months, which one month at a time never does', () => {
+    const book = twoMonths();
+    const year = yearTotals(book, '2026');
+
+    expect(year.hours).toBe(11);
+    expect(year.amount).toBe(monthTotals(book, '2026-09').amount + monthTotals(book, '2026-10').amount);
+    expect(year.byProject['tin']).toEqual({ hours: 4, amount: fromEuros(360) });
+  });
+
+  it('gives every month a line, empty ones included', () => {
+    const year = yearTotals(twoMonths(), '2026');
+
+    expect(year.months).toHaveLength(12);
+    expect(year.months.map((line) => line.month)).toEqual(eachMonthOfYear('2026'));
+    expect(year.months[8]).toMatchObject({ month: '2026-09', hours: 9, amount: fromEuros(900) });
+    expect(year.months[9]).toMatchObject({ month: '2026-10', hours: 2, amount: fromEuros(160) });
+    expect(year.months[0]).toMatchObject({ hours: 0, amount: 0 });
+  });
+
+  it('splits each month, and the year, over the three states money can be in', () => {
+    const year = yearTotals(twoMonths(), '2026');
+
+    expect(year.months[8]?.byStatus).toEqual({
+      unbilled: fromEuros(200),
+      invoiced: fromEuros(400),
+      paid: fromEuros(300)
+    });
+    expect(year.byStatus.paid).toBe(fromEuros(300 + 160));
+    expect(year.outstanding).toBe(fromEuros(600));
+  });
+
+  it('leaves the years either side of it alone', () => {
+    const year = yearTotals(twoMonths(), '2025');
+
+    expect(year.hours).toBe(1);
+    expect(year.amount).toBe(fromEuros(100));
+    expect(year.days['2026-09-07']).toBeUndefined();
+  });
+
+  it('hands the heatmap one entry per worked day, and the fullest of them', () => {
+    const year = yearTotals(exampleBook(), '2026');
+
+    expect(Object.keys(year.days)).toEqual(['2026-09-07', '2026-09-08', '2026-09-09']);
+    expect(year.days['2026-09-07']).toEqual({
+      hours: 4,
+      amount: fromEuros(400),
+      status: 'invoiced'
+    });
+    expect(year.busiestHours).toBe(4);
+  });
+
+  it('reads a year with nothing in it without dividing by zero', () => {
+    const year = yearTotals(exampleBook(), '2030');
+
+    expect(year).toMatchObject({ hours: 0, amount: 0, averageRate: 0, busiestHours: 0 });
+    expect(year.months).toHaveLength(12);
+    expect(emptyYearTotals('2030')).toEqual(year);
   });
 });

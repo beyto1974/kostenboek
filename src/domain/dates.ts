@@ -9,8 +9,12 @@ export type PlainDate = string;
 /** A calendar month, 'YYYY-MM'. */
 export type PlainMonth = string;
 
+/** A calendar year, 'YYYY'. */
+export type PlainYear = string;
+
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MONTH_PATTERN = /^(\d{4})-(\d{2})$/;
+const YEAR_PATTERN = /^\d{4}$/;
 const DAY_MS = 86_400_000;
 
 /** Days in a month, 1-indexed on the month. */
@@ -58,8 +62,21 @@ export function today(clock: () => Date = () => new Date()): PlainDate {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
+/** Validates 'YYYY'. */
+export function plainYear(value: string): PlainYear {
+  if (!YEAR_PATTERN.test(value)) {
+    throw new TypeError(`A year must be written as YYYY, not "${value}".`);
+  }
+  return value;
+}
+
 export function monthOf(date: PlainDate): PlainMonth {
   return date.slice(0, 7);
+}
+
+/** The year of a date or of a month — both are written year first. */
+export function yearOf(dateOrMonth: PlainDate | PlainMonth): PlainYear {
+  return dateOrMonth.slice(0, 4);
 }
 
 export function dayOfMonth(date: PlainDate): number {
@@ -141,6 +158,51 @@ export function monthGrid(month: PlainMonth): CalendarWeek[] {
     weeks.push({ week: isoWeek(anchor), days: [...row, ...new Array(7 - row.length).fill(null)] });
   }
   return weeks;
+}
+
+export function eachMonthOfYear(year: PlainYear): PlainMonth[] {
+  plainYear(year);
+  return Array.from({ length: 12 }, (_, index) => `${year}-${pad(index + 1)}`);
+}
+
+/**
+ * One column of the year heatmap: a week read downwards, Monday at the top, with
+ * blanks before the year has started and after it has ended.
+ */
+export interface YearColumn {
+  days: (PlainDate | null)[];
+  /** The month to write above this column, on the first column that month reaches. */
+  label: PlainMonth | null;
+}
+
+/**
+ * A whole year as week-tall columns, which is how a year of days fits on one
+ * screen: 52 or 53 columns of seven, running from the Monday on or before
+ * 1 January to the Sunday on or after 31 December.
+ */
+export function yearColumns(year: PlainYear): YearColumn[] {
+  const days = eachMonthOfYear(year).flatMap(eachDayOfMonth);
+  const first = days[0] as PlainDate;
+
+  const columns: YearColumn[] = [];
+  const labelled = new Set<PlainMonth>();
+  let column: (PlainDate | null)[] = new Array(weekdayIndex(first)).fill(null);
+
+  const close = (): void => {
+    const opening = column.find((day): day is PlainDate => day !== null);
+    const month = opening ? monthOf(opening) : null;
+    const label = month && !labelled.has(month) ? month : null;
+    if (label) labelled.add(label);
+    columns.push({ days: [...column, ...new Array(7 - column.length).fill(null)], label });
+    column = [];
+  };
+
+  for (const day of days) {
+    column.push(day);
+    if (column.length === 7) close();
+  }
+  if (column.length > 0) close();
+  return columns;
 }
 
 function pad(value: number): string {

@@ -1,8 +1,8 @@
 import { isPlainDate, type PlainDate, type PlainMonth } from '../domain/dates';
 
-export type View = 'calendar' | 'matrix' | 'day';
+export type View = 'calendar' | 'matrix' | 'day' | 'year';
 
-const VIEWS: View[] = ['calendar', 'matrix', 'day'];
+const VIEWS: View[] = ['calendar', 'matrix', 'day', 'year'];
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** What the address bar carries: which tab is open, and what it is looking at. */

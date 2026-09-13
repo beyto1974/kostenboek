@@ -1,13 +1,15 @@
 import { createMemo, createSignal } from 'solid-js';
-import { monthOf, type PlainDate, type PlainMonth } from '../domain/dates';
+import { monthOf, yearOf, type PlainDate, type PlainMonth, type PlainYear } from '../domain/dates';
 import {
   dayBlocks as blocksOfDay,
   dayTally as tallyOfDay,
+  emptyYearTotals,
   type Aging,
   type DayBlock,
   type DayTally,
   type MonthTotals,
-  type WeekTally
+  type WeekTally,
+  type YearTotals
 } from '../domain/rollups';
 import { emptyBook } from '../persistence/codec';
 import type { Book, DayStatus, Project, ProjectId, RateKind, Slot, SlotKey } from '../domain/types';
@@ -84,6 +86,8 @@ export function createBookState(client: BookClient) {
         byStatus: { unbilled: 0, invoiced: 0, paid: 0 },
         byProject: {}
       },
+    year: (): PlainYear => yearOf(month() || '2000-01'),
+    yearTotals: (): YearTotals => snapshot()?.year ?? emptyYearTotals(yearOf(month() || '2000-01')),
     weeks: (): WeekTally[] => snapshot()?.weeks ?? [],
     aging: (): Aging =>
       snapshot()?.aging ?? { unbilled: 0, upTo30: 0, upTo60: 0, over60: 0, oldestDays: 0 },
@@ -98,6 +102,8 @@ export function createBookState(client: BookClient) {
     activeRate,
     open: () => send({ kind: 'open' }),
     showMonth: (wanted: PlainMonth) => send({ kind: 'view', month: wanted }),
+    /** The overview moves a year at a time, keeping the month it was looking at. */
+    showYear: (wanted: PlainYear) => send({ kind: 'view', month: `${wanted}-${month().slice(5, 7)}` }),
     /** Picking a project also picks which of its two rates the next hour is booked at. */
     selectProject: (id: ProjectId, rate: RateKind = 'standard') => {
       setActiveProjectId(id);

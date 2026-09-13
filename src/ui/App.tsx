@@ -1,7 +1,7 @@
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 import { sampleBook } from '../data/sample';
 import { backupReminder } from '../domain/backup';
-import { addDays, addMonths, monthOf, type PlainDate } from '../domain/dates';
+import { addDays, addMonths, monthOf, type PlainDate, type PlainMonth } from '../domain/dates';
 import { createIdbStore } from '../persistence/idbStore';
 import {
   markDismissed,
@@ -23,6 +23,7 @@ import { ProjectPicker } from './ProjectPicker';
 import { ProjectsEditor } from './ProjectsEditor';
 import { ThemeToggle } from './ThemeToggle';
 import { TotalsRail } from './TotalsRail';
+import { YearView } from './YearView';
 import { monthLabel } from './format';
 import { createBookState } from './state';
 import { applyTheme } from './theme';
@@ -31,7 +32,8 @@ import { readLocation, writeLocation, type View } from './url';
 const VIEWS: { id: View; label: string }[] = [
   { id: 'calendar', label: 'Calendar' },
   { id: 'matrix', label: 'Month matrix' },
-  { id: 'day', label: 'Day' }
+  { id: 'day', label: 'Day' },
+  { id: 'year', label: 'Year' }
 ];
 
 /**
@@ -128,6 +130,11 @@ export function App(): JSX.Element {
   function openDay(date: PlainDate): void {
     app.selectDay(date);
     setView('day');
+  }
+
+  function openMonth(month: PlainMonth): void {
+    void app.showMonth(month);
+    setView('calendar');
   }
 
   async function exportBook(): Promise<void> {
@@ -248,7 +255,7 @@ export function App(): JSX.Element {
       </div>
 
       <Show when={app.ready()} fallback={<p class="hint">Opening the book…</p>}>
-        <div class="layout">
+        <div class="layout" classList={{ wide: view() === 'year' }}>
           <div>
             <Show when={view() === 'calendar'}>
               <CalendarView app={app} onOpenDay={openDay} />
@@ -259,8 +266,13 @@ export function App(): JSX.Element {
             <Show when={view() === 'day'}>
               <DayView app={app} />
             </Show>
+            <Show when={view() === 'year'}>
+              <YearView app={app} onOpenDay={openDay} onOpenMonth={openMonth} />
+            </Show>
           </div>
-          <TotalsRail app={app} />
+          <Show when={view() !== 'year'}>
+            <TotalsRail app={app} />
+          </Show>
         </div>
         <ProjectsEditor app={app} />
       </Show>

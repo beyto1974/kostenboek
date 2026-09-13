@@ -36,6 +36,11 @@ export function monthLabel(month: PlainMonth): string {
   return `${MONTHS[index] ?? month} ${month.slice(0, 4)}`;
 }
 
+/** 'Sep' — the month where a column of a year is too narrow for its name. */
+export function monthShort(month: PlainMonth): string {
+  return MONTHS[Number(month.slice(5, 7)) - 1]?.slice(0, 3) ?? month;
+}
+
 export function weekdayLabel(index: number): string {
   return WEEKDAYS[index] ?? '';
 }

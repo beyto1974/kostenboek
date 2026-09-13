@@ -99,3 +99,35 @@ test('the theme toggle walks system, light and dark', async ({ page }) => {
   await toggle.click();
   await expect(root).not.toHaveAttribute('data-theme', /.*/);
 });
+
+test('the year overview sums across months and paints a heatmap', async ({ page }) => {
+  await page.goto('/?view=year');
+
+  // A column a week, a square a day: a whole year on one screen.
+  const columns = page.locator('.heat-column');
+  await expect(columns.first()).toBeVisible();
+  expect(await columns.count()).toBeGreaterThanOrEqual(52);
+  await expect(page.locator('.heat.step-4').first()).toBeVisible();
+
+  // The example spans more than one month, so the year is more than any of them.
+  const months = page.locator('.year-months tbody tr:not(.quiet)');
+  expect(await months.count()).toBeGreaterThan(1);
+  await expect(page.locator('.year-months tfoot .right').first()).not.toHaveText('0h');
+  await expect(page.locator('.year .tile.lead .big')).not.toHaveText('€ 0');
+
+  // A month in the table opens that month on the calendar.
+  await months.first().getByRole('button').click();
+  await expect(page.getByRole('tab', { name: 'Calendar' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.calendar')).toBeVisible();
+});
+
+test('a day in the heatmap opens that day', async ({ page }) => {
+  await page.goto('/?view=year');
+
+  const worked = page.locator('.heat.step-4').first();
+  const label = (await worked.getAttribute('aria-label')) ?? '';
+  await worked.click();
+
+  await expect(page.getByRole('tab', { name: 'Day' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.day-head h2')).toContainText(label.split(' ·')[0] as string);
+});

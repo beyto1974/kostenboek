@@ -1,5 +1,5 @@
 import type { PlainDate, PlainMonth } from '../domain/dates';
-import type { Aging, MonthTotals, WeekTally } from '../domain/rollups';
+import type { Aging, MonthTotals, WeekTally, YearTotals } from '../domain/rollups';
 import type { Book, DayStatus, ProjectId, RateKind, SlotKey } from '../domain/types';
 
 /** What the UI may send a project's way. Rates are cents; text arrives untrimmed. */
@@ -43,6 +43,8 @@ export interface SnapshotResponse {
   month: PlainMonth;
   today: PlainDate;
   totals: MonthTotals;
+  /** The year that month sits in, added up — the overview reads this. */
+  year: YearTotals;
   weeks: WeekTally[];
   aging: Aging;
   isExample: boolean;

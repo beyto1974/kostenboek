@@ -377,6 +377,11 @@ h1 span {
   align-items: start;
 }
 
+/* The year overview carries its own totals, so it takes the rail's room too. */
+.layout.wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 @media (max-width: 960px) {
   .layout {
     grid-template-columns: 1fr;
@@ -1055,10 +1060,197 @@ td.money {
   font-size: 12.5px;
 }
 
+
+/* year overview ----------------------------------------------------------- */
+
+.year {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.year-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 11px 13px;
+}
+
+.year-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.year-head .figure {
+  padding: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.year-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.heatmap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 12px 13px 10px;
+}
+
+.heat-scroll {
+  overflow-x: auto;
+}
+
+.heat-months,
+.heat-grid {
+  display: flex;
+  gap: 3px;
+}
+
+/* The weekday column is 26px wide and the gap beside it 4px. */
+.heat-months {
+  padding-left: 30px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heat-months span {
+  flex: none;
+  width: 14px;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.heat-body {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.heat-weekdays {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 26px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.heat-weekdays span {
+  height: 14px;
+  line-height: 14px;
+}
+
+.heat-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heat {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 0;
+  border-radius: 2px;
+  background: var(--sunk);
+  padding: 0;
+}
+
+/* A day the year does not have: the column keeps its place, the square goes. */
+.heat.void {
+  background: transparent;
+  cursor: default;
+}
+
+.heat.step-0 {
+  background: var(--sunk);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.heat.step-1 {
+  background: color-mix(in oklab, var(--accent) 28%, var(--sunk));
+}
+
+.heat.step-2 {
+  background: color-mix(in oklab, var(--accent) 52%, var(--sunk));
+}
+
+.heat.step-3 {
+  background: color-mix(in oklab, var(--accent) 76%, var(--sunk));
+}
+
+.heat.step-4 {
+  background: var(--accent);
+}
+
+button.heat:hover {
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+
+.heat.today {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.heat-legend {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+.heat-legend span:last-child {
+  margin-left: 4px;
+}
+
+.year-months {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 4px 13px 10px;
+}
+
+.year-months tr.quiet td {
+  color: var(--ink-3);
+}
+
+.year-months tfoot th,
+.year-months tfoot td {
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 0;
+  padding-top: 7px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .slot,
   .band,
-  .cell {
+  .cell,
+  .heat {
     transition:
       box-shadow 0.08s,
       background 0.08s;

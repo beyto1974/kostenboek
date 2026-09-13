@@ -1,6 +1,12 @@
-import { monthOf, plainMonth, today as todayFrom, type PlainMonth } from '../domain/dates';
+import {
+  monthOf,
+  plainMonth,
+  today as todayFrom,
+  yearOf,
+  type PlainMonth
+} from '../domain/dates';
 import { colorForIndex } from '../domain/palette';
-import { aging, monthTotals, weekTallies } from '../domain/rollups';
+import { aging, monthTotals, weekTallies, yearTotals } from '../domain/rollups';
 import { clearSlots, paintSlots, setDayStatus } from '../domain/slots';
 import { cleanText, requireText } from '../domain/text';
 import type { Book, Project } from '../domain/types';
@@ -56,6 +62,7 @@ export function createHandler({
       month: shown,
       today,
       totals: monthTotals(current, shown),
+      year: yearTotals(current, yearOf(shown)),
       weeks: weekTallies(current, shown),
       aging: aging(current, today),
       isExample: current.example === true

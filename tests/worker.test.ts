@@ -29,6 +29,7 @@ describe('opening the book', () => {
     expect(opened.today).toBe('2026-09-13');
     expect(opened.totals.hours).toBe(9);
     expect(opened.weeks).toHaveLength(5);
+    expect(opened.year).toMatchObject({ year: '2026', hours: 9 });
     expect(opened.aging.unbilled).toBe(fromEuros(200));
     expect(opened.isExample).toBe(false);
   });
@@ -242,5 +243,36 @@ describe('the client', () => {
     expect(opened.kind).toBe('snapshot');
     expect(october.kind === 'snapshot' && october.month).toBe('2026-10');
     client.close();
+  });
+});
+
+describe('the year beside the month', () => {
+  it('answers with the year the shown month sits in', async () => {
+    const { handle } = handler();
+
+    const opened = await snapshot(handle, { kind: 'open' });
+    expect(opened.year.year).toBe('2026');
+    expect(opened.year.months[8]).toMatchObject({ month: '2026-09', hours: 9 });
+
+    const december = await snapshot(handle, { kind: 'view', month: '2025-12' });
+    expect(december.year.year).toBe('2025');
+    expect(december.year.hours).toBe(0);
+  });
+
+  it('moves the year total as soon as an hour is booked', async () => {
+    const { handle } = handler();
+    await snapshot(handle, { kind: 'open' });
+
+    const painted = await snapshot(handle, {
+      kind: 'paint',
+      slots: ['2026-03-02T09'],
+      projectId: 'nls',
+      rate: 'standard'
+    });
+
+    expect(painted.year.hours).toBe(10);
+    expect(painted.year.months[2]).toMatchObject({ month: '2026-03', hours: 1 });
+    // The month on screen is September, which knows nothing about March.
+    expect(painted.totals.hours).toBe(9);
   });
 });

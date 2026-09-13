@@ -9,8 +9,12 @@ import {
   monthGrid,
   monthOf,
   plainDate,
+  eachMonthOfYear,
+  plainYear,
   today,
-  weekdayIndex
+  weekdayIndex,
+  yearColumns,
+  yearOf
 } from '../src/domain/dates';
 
 describe('plainDate', () => {
@@ -111,5 +115,62 @@ describe('a month as it is read', () => {
     const grid = monthGrid('2026-06');
     expect(grid[0]?.days[0]).toBe('2026-06-01');
     expect(grid.at(-1)?.days[1]).toBe('2026-06-30');
+  });
+});
+
+describe('a year', () => {
+  it('accepts a year and refuses anything else', () => {
+    expect(plainYear('2026')).toBe('2026');
+    expect(() => plainYear('26')).toThrow(TypeError);
+    expect(() => plainYear('2026-09')).toThrow(TypeError);
+  });
+
+  it('reads the year off a date or a month', () => {
+    expect(yearOf('2026-09-13')).toBe('2026');
+    expect(yearOf('2026-09')).toBe('2026');
+  });
+
+  it('lists its twelve months in order', () => {
+    const months = eachMonthOfYear('2026');
+    expect(months).toHaveLength(12);
+    expect(months[0]).toBe('2026-01');
+    expect(months[11]).toBe('2026-12');
+  });
+
+  it('lays the year out in weeks read downwards', () => {
+    const columns = yearColumns('2026');
+
+    // 1 January 2026 is a Thursday: three blanks above it in the first column.
+    expect(columns[0]?.days.slice(0, 4)).toEqual([null, null, null, '2026-01-01']);
+    expect(columns.every((column) => column.days.length === 7)).toBe(true);
+
+    const last = columns.at(-1);
+    expect(last?.days[3]).toBe('2026-12-31');
+    expect(last?.days[4]).toBeNull();
+  });
+
+  it('holds every day of the year once', () => {
+    const days = yearColumns('2026')
+      .flatMap((column) => column.days)
+      .filter((day): day is string => day !== null);
+
+    expect(days).toHaveLength(365);
+    expect(new Set(days).size).toBe(365);
+  });
+
+  it('writes each month once, over the first column that month reaches', () => {
+    const labels = yearColumns('2026')
+      .map((column) => column.label)
+      .filter((label): label is string => label !== null);
+
+    expect(labels).toEqual(eachMonthOfYear('2026'));
+  });
+
+  it('lays out a leap year that starts on a Monday', () => {
+    const columns = yearColumns('2024');
+    expect(columns[0]?.days[0]).toBe('2024-01-01');
+    expect(
+      columns.flatMap((column) => column.days).filter((day) => day !== null)
+    ).toHaveLength(366);
   });
 });

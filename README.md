@@ -29,7 +29,7 @@ the projects and the rates are made up so the screens have something to show.
 - `src/domain` — pure model: dates, money, slots, rollups. No DOM, no storage.
 - `src/persistence` — codec, store port, IndexedDB adapter, export/import bundles.
 - `src/worker` — the message protocol, its handler, the worker and its client.
-- `src/ui` — Solid components: calendar, month matrix, day view, totals rail.
+- `src/ui` — Solid components: calendar, month matrix, day view, year overview, totals rail.
 - `src/data/sample.ts` — the worked example a first-time visitor is shown.
 - `tests/`, `e2e/` — unit tests mirroring `src/`, and one browser smoke test.
 - `prototypes/` — the three HTML design studies this app grew out of. Not built.
@@ -38,8 +38,10 @@ the projects and the rates are made up so the screens have something to show.
 
 The UI never touches storage. It sends a request to the worker (`src/worker/protocol.ts`)
 and the worker answers with the whole picture for the month on screen — the book, the
-totals, the week lines and the aging buckets — so a click never has to recompute a total
-on the main thread. The same handler runs inline when a browser will not give us a worker.
+totals, the week lines, the aging buckets and the year that month sits in — so a click
+never has to recompute a total on the main thread. The year is what the overview tab
+reads: months only ever add up one at a time, so the twelve lines, the projects behind
+them and the day heatmap are counted in one pass over the book. The same handler runs inline when a browser will not give us a worker.
 
 ## Licence
 

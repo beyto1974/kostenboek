@@ -84,7 +84,7 @@ export function TotalsRail(props: { app: BookState }): JSX.Element {
       </section>
 
       <section class="tile">
-        <h2>how old the money is</h2>
+        <h2>how old the money is · whole book</h2>
         <ul class="split">
           <li>
             <span class="label">not invoiced</span>

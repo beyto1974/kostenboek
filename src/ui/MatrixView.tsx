@@ -3,6 +3,7 @@ import { eachDayOfMonth, isWeekend, weekdayIndex } from '../domain/dates';
 import { formatEuros } from '../domain/money';
 import { slotKey } from '../domain/slots';
 import { dayLabel, hourLabel, hoursLabel, STATUS_LABEL, weekdayLabel } from './format';
+import { rateShade } from './palette';
 import type { BookState } from './state';
 
 /**
@@ -79,7 +80,11 @@ export function MatrixView(props: { app: BookState; onOpenDay: (date: string) =>
                             class="slot"
                             style={{
                               background: slot()
-                                ? (props.app.projectOf(slot()!.projectId)?.color ?? 'var(--unbilled)')
+                                ? rateShade(
+                                    props.app.projectOf(slot()!.projectId)?.color ??
+                                      'var(--unbilled)',
+                                    slot()!.kind
+                                  )
                                 : 'transparent'
                             }}
                             aria-label={`${dayLabel(date)} ${hourLabel(hour)}`}

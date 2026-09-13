@@ -3,6 +3,7 @@ import { addDays, weekdayIndex } from '../domain/dates';
 import { formatEuros } from '../domain/money';
 import { slotKey } from '../domain/slots';
 import { dayLabel, hourLabel, hoursLabel, STATUS_LABEL, weekdayLabel } from './format';
+import { rateShade } from './palette';
 import type { BookState } from './state';
 
 /** One day as wide bands: enough room to read the project and what the hour earned. */
@@ -89,7 +90,11 @@ export function DayView(props: { app: BookState }): JSX.Element {
                   type="button"
                   class="band"
                   classList={{ filled: Boolean(slot()) }}
-                  style={{ background: project()?.color ?? 'transparent' }}
+                  style={{
+                    background: project()
+                      ? rateShade(project()!.color, slot()?.kind ?? 'standard')
+                      : 'transparent'
+                  }}
                   onClick={() => void props.app.toggle(key())}
                 >
                   <Show

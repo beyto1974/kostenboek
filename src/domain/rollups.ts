@@ -73,6 +73,41 @@ export function dayTally(book: Book, date: PlainDate): DayTally {
   return { date, hours, amount, status: book.days[date]?.status ?? 'unbilled', byProject };
 }
 
+/** One project at one of its rates, on one day. */
+export interface DayBlock extends Tally {
+  projectId: ProjectId;
+  kind: RateKind;
+}
+
+/**
+ * A day broken up the way a calendar cell draws it: one block per project per
+ * rate, so an hour booked at the second rate reads as its own band rather than
+ * disappearing into the project's total.
+ */
+export function dayBlocks(book: Book, date: PlainDate): DayBlock[] {
+  plainDate(date);
+  const blocks = new Map<string, DayBlock>();
+
+  for (const [key, slot] of Object.entries(book.slots)) {
+    if (!key.startsWith(`${date}T`)) continue;
+    const id = `${slot.projectId}:${slot.kind}`;
+    const block = blocks.get(id) ?? {
+      projectId: slot.projectId,
+      kind: slot.kind,
+      hours: 0,
+      amount: 0
+    };
+    block.hours += 1;
+    block.amount += worth(slot);
+    blocks.set(id, block);
+  }
+
+  // Standard hours first: the ordinary rate is the one that reads as the baseline.
+  return [...blocks.values()].sort((left, right) =>
+    left.kind === right.kind ? left.projectId.localeCompare(right.projectId) : left.kind === 'standard' ? -1 : 1
+  );
+}
+
 export function monthTotals(book: Book, month: PlainMonth): MonthTotals {
   const byStatus: Record<DayStatus, Cents> = { unbilled: 0, invoiced: 0, paid: 0 };
   const byProject: Record<ProjectId, Tally> = {};

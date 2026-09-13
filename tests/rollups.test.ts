@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fromEuros } from '../src/domain/money';
-import { aging, dayTally, monthTotals, rateFor, weekTallies } from '../src/domain/rollups';
+import { aging, dayBlocks, dayTally, monthTotals, rateFor, weekTallies } from '../src/domain/rollups';
 import { exampleBook, tinsmith } from './fixtures';
 
 describe('rates', () => {
@@ -30,6 +30,19 @@ describe('a day', () => {
     expect(day.amount).toBe(fromEuros(75 + 105));
     expect(day.status).toBe('unbilled');
     expect(day.byProject['tin']).toEqual({ hours: 2, amount: fromEuros(180) });
+  });
+
+  it('keeps the two rates apart, so a calendar cell can show them apart', () => {
+    const blocks = dayBlocks(exampleBook(), '2026-09-08');
+
+    expect(blocks).toEqual([
+      { projectId: 'tin', kind: 'standard', hours: 1, amount: fromEuros(80) },
+      { projectId: 'tin', kind: 'premium', hours: 1, amount: fromEuros(120) }
+    ]);
+  });
+
+  it('has no blocks on a day with nothing on it', () => {
+    expect(dayBlocks(exampleBook(), '2026-09-30')).toEqual([]);
   });
 
   it('reads an untouched day as empty and unbilled', () => {

@@ -1,6 +1,7 @@
 import { For, type JSX } from 'solid-js';
 import { formatEuros } from '../domain/money';
 import type { Project, RateKind } from '../domain/types';
+import { rateShade } from './palette';
 
 /**
  * Which project the next painted hour belongs to, and at which of its two rates.
@@ -20,7 +21,14 @@ export function ProjectPicker(props: {
     <div class="picker" role="radiogroup" aria-label="Project and rate">
       <For each={props.projects}>
         {(project, index) => (
-          <div class="chip" style={{ color: project.color, '--chip': project.color }}>
+          <div
+            class="chip"
+            style={{
+              color: project.color,
+              '--chip': project.color,
+              '--chip-second': rateShade(project.color, 'premium')
+            }}
+          >
             <span class="swatch" style={{ background: project.color }} />
             <b>{project.code}</b>
             <span class="rates">

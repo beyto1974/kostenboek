@@ -17,10 +17,17 @@
   --invoiced: #9a6805;
   --unbilled: #5d6673;
   --late: #a52347;
+  /* Ten hues, each readable with white text on it. */
   --project-1: #1443cf;
   --project-2: #b23c1b;
   --project-3: #0c6a4a;
   --project-4: #6a3a9e;
+  --project-5: #a8123f;
+  --project-6: #0f6280;
+  --project-7: #7a5600;
+  --project-8: #3d6420;
+  --project-9: #8c2f78;
+  --project-10: #2b4b6f;
   --radius: 3px;
   --mono: 'Chivo Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
@@ -44,6 +51,12 @@
     --project-2: #e2703f;
     --project-3: #25a878;
     --project-4: #a173e0;
+    --project-5: #f2618c;
+    --project-6: #3fb6d4;
+    --project-7: #d2a63c;
+    --project-8: #85c25a;
+    --project-9: #e07ad0;
+    --project-10: #7e9ad8;
   }
 }
 
@@ -65,6 +78,12 @@
   --project-2: #e2703f;
   --project-3: #25a878;
   --project-4: #a173e0;
+  --project-5: #f2618c;
+  --project-6: #3fb6d4;
+  --project-7: #d2a63c;
+  --project-8: #85c25a;
+  --project-9: #e07ad0;
+  --project-10: #7e9ad8;
 }
 
 * {
@@ -276,6 +295,11 @@ h1 span {
 .rates button[aria-checked='true'] {
   background: var(--chip, var(--accent));
   color: #fff;
+}
+
+/* The second rate is the same colour pulled towards the ink, as on the grid. */
+.rates button.second[aria-checked='true'] {
+  background: var(--chip-second, var(--accent));
 }
 
 .swatch {

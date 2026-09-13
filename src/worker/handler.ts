@@ -1,4 +1,5 @@
 import { monthOf, plainMonth, today as todayFrom, type PlainMonth } from '../domain/dates';
+import { colorForIndex } from '../domain/palette';
 import { aging, monthTotals, weekTallies } from '../domain/rollups';
 import { clearSlots, paintSlots, setDayStatus } from '../domain/slots';
 import { cleanText, requireText } from '../domain/text';
@@ -146,9 +147,9 @@ function uniqueId(book: Book, code: string): string {
   return `${base}-${suffix}`;
 }
 
-/** Four project colours live in the stylesheet; after that they come round again. */
+/** Ten project colours live in the stylesheet; after that they come round again. */
 function nextColor(book: Book): string {
-  return `var(--project-${(book.projects.length % 4) + 1})`;
+  return colorForIndex(book.projects.length);
 }
 
 function wholeCents(value: number, field: string): number {

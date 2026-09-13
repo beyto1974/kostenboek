@@ -2,6 +2,7 @@ import { For, Show, type JSX } from 'solid-js';
 import { dayOfMonth, isWeekend, monthGrid } from '../domain/dates';
 import { formatEuros } from '../domain/money';
 import { hoursLabel, STATUS_SHORT, weekdayLabel } from './format';
+import { rateShade } from './palette';
 import type { BookState } from './state';
 
 /**
@@ -48,16 +49,20 @@ export function CalendarView(props: { app: BookState; onOpenDay: (date: string) 
                         </span>
 
                         <span class="cell-blocks">
-                          <For each={Object.entries(tally().byProject)}>
-                            {([id, part]) => (
+                          <For each={props.app.dayBlocksOf(day())}>
+                            {(block) => (
                               <span
                                 class="block"
                                 style={{
-                                  background: props.app.projectOf(id)?.color ?? 'var(--unbilled)',
-                                  flex: String(part.hours)
+                                  background: rateShade(
+                                    props.app.projectOf(block.projectId)?.color ?? 'var(--unbilled)',
+                                    block.kind
+                                  ),
+                                  flex: String(block.hours)
                                 }}
                               >
-                                {props.app.projectOf(id)?.code} {part.hours}h
+                                {props.app.projectOf(block.projectId)?.code} {block.hours}h
+                                {block.kind === 'premium' ? ' ★' : ''}
                               </span>
                             )}
                           </For>

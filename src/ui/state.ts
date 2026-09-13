@@ -1,6 +1,14 @@
 import { createMemo, createSignal } from 'solid-js';
 import { monthOf, type PlainDate, type PlainMonth } from '../domain/dates';
-import { dayTally as tallyOfDay, type Aging, type DayTally, type MonthTotals, type WeekTally } from '../domain/rollups';
+import {
+  dayBlocks as blocksOfDay,
+  dayTally as tallyOfDay,
+  type Aging,
+  type DayBlock,
+  type DayTally,
+  type MonthTotals,
+  type WeekTally
+} from '../domain/rollups';
 import { emptyBook } from '../persistence/codec';
 import type { Book, DayStatus, Project, ProjectId, RateKind, Slot, SlotKey } from '../domain/types';
 import type { BookClient } from '../worker/client';
@@ -81,6 +89,7 @@ export function createBookState(client: BookClient) {
       snapshot()?.aging ?? { unbilled: 0, upTo30: 0, upTo60: 0, over60: 0, oldestDays: 0 },
     dayTally: (): DayTally => tallyOfDay(book(), day() || '2000-01-01'),
     dayTallyOf: (date: PlainDate): DayTally => tallyOfDay(book(), date),
+    dayBlocksOf: (date: PlainDate): DayBlock[] => blocksOfDay(book(), date),
     slotAt: (key: SlotKey): Slot | undefined => book().slots[key],
     projectOf: (id: ProjectId): Project | undefined =>
       book().projects.find((project) => project.id === id),

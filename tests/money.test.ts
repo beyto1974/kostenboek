@@ -24,7 +24,7 @@ describe('euros and cents', () => {
 
   it('adds without drifting', () => {
     const rates = [fromEuros(100), fromEuros(0.1), fromEuros(0.2)];
-    expect(sumCents(rates)).toBe(9530);
+    expect(sumCents(rates)).toBe(10030);
     expect(sumCents([])).toBe(0);
   });
 });
@@ -47,7 +47,7 @@ describe('VAT', () => {
 
 describe('reading an amount somebody typed', () => {
   it('takes a whole number of euros', () => {
-    expect(parseAmount('95')).toBe(10000);
+    expect(parseAmount('100')).toBe(10000);
   });
 
   it('takes a comma or a full stop for the cents, and spaces around it', () => {
@@ -69,11 +69,11 @@ describe('reading an amount somebody typed', () => {
 describe('formatting', () => {
   it('writes amounts the Belgian way, without the cents when there are none', () => {
     expect(formatEuros(123450)).toBe('€ 1.234,50');
-    expect(formatEuros(10000)).toBe('€ 95');
+    expect(formatEuros(10000)).toBe('€ 100');
     expect(formatEuros(0)).toBe('€ 0');
   });
 
   it('keeps a negative amount readable', () => {
-    expect(formatEuros(-10000)).toBe('-€ 95');
+    expect(formatEuros(-10000)).toBe('-€ 100');
   });
 });

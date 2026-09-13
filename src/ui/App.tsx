@@ -1,10 +1,20 @@
-import { createEffect, createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 import { sampleBook } from '../data/sample';
+import { backupReminder } from '../domain/backup';
 import { addDays, addMonths, monthOf, type PlainDate } from '../domain/dates';
 import { createIdbStore } from '../persistence/idbStore';
-import { readTheme, writeTheme, type Theme } from '../persistence/preferences';
+import {
+  markDismissed,
+  markExported,
+  readBackupMarks,
+  readTheme,
+  writeTheme,
+  type BackupMarks,
+  type Theme
+} from '../persistence/preferences';
 import { createHandler } from '../worker/handler';
 import { createInlineClient, createWorkerClient, type BookClient } from '../worker/client';
+import { BackupBar } from './BackupBar';
 import { CalendarView } from './CalendarView';
 import { DayView } from './DayView';
 import { ExampleBar } from './ExampleBar';
@@ -46,7 +56,22 @@ export function App(): JSX.Element {
   const opened = readLocation(globalThis.location?.search ?? '');
   const [view, setView] = createSignal<View>(opened.view);
   const [theme, setTheme] = createSignal<Theme>(readTheme());
+  const [marks, setMarks] = createSignal<BackupMarks>(readBackupMarks());
+  // The page is left open for days at a time, so the reminder is worked out
+  // against a clock that keeps ticking rather than against the moment of loading.
+  const [now, setNow] = createSignal(Date.now());
   let fileInput: HTMLInputElement | undefined;
+
+  const backup = createMemo(() =>
+    backupReminder({
+      now: now(),
+      lastExportAt: marks().lastExportAt,
+      firstSeenAt: marks().firstSeenAt,
+      dismissedAt: marks().dismissedAt,
+      hasWork: Object.keys(app.book().slots).length > 0,
+      isExample: app.isExample()
+    })
+  );
 
   createEffect(() => applyTheme(theme()));
 
@@ -75,6 +100,13 @@ export function App(): JSX.Element {
     if (event.key === 'ArrowRight') app.selectDay(addDays(app.selectedDay(), 1));
   }
 
+  // A quarter of an hour is fine for a threshold measured in days, and the tab
+  // coming back to the front is the other moment worth re-reading the clock at.
+  const tick = (): void => {
+    setNow(Date.now());
+  };
+  const timer = setInterval(tick, 15 * 60 * 1000);
+
   onMount(() => {
     void app.open().then(() => {
       // What the link asked for, once there is a book to show it against.
@@ -82,9 +114,14 @@ export function App(): JSX.Element {
       else if (opened.month) void app.showMonth(opened.month);
     });
     document.addEventListener('keydown', onKey);
+    document.addEventListener('visibilitychange', tick);
+    globalThis.addEventListener('focus', tick);
   });
   onCleanup(() => {
+    clearInterval(timer);
     document.removeEventListener('keydown', onKey);
+    document.removeEventListener('visibilitychange', tick);
+    globalThis.removeEventListener('focus', tick);
     client.close();
   });
 
@@ -102,6 +139,14 @@ export function App(): JSX.Element {
     link.download = file.filename;
     link.click();
     URL.revokeObjectURL(url);
+
+    markExported();
+    setMarks(readBackupMarks());
+  }
+
+  function dismissBackup(): void {
+    markDismissed();
+    setMarks(readBackupMarks());
   }
 
   async function importBook(event: Event): Promise<void> {
@@ -157,6 +202,14 @@ export function App(): JSX.Element {
 
       <Show when={app.isExample()}>
         <ExampleBar onClear={() => void app.clearExample()} />
+      </Show>
+
+      <Show when={backup().due}>
+        <BackupBar
+          days={backup().days}
+          onExport={() => void exportBook()}
+          onDismiss={dismissBackup}
+        />
       </Show>
 
       <Show when={app.error()}>

@@ -50,6 +50,42 @@ test('an hour is booked at the rate button that is pressed', async ({ page }) =>
   await expect(page.locator('.band.filled .band-rate').first()).toHaveText(label.replace(' ★', ''));
 });
 
+test('a week without an exported file is said out loud, and can be waved away', async ({ page }) => {
+  const tenDaysAgo = Date.now() - 10 * 86_400_000;
+
+  // A book of somebody's own (not the example) that was last exported ten days ago.
+  await page.addInitScript((firstSeen) => {
+    localStorage.setItem('kostenboek.firstSeen', String(firstSeen));
+    localStorage.setItem('kostenboek.lastExport', String(firstSeen));
+  }, tenDaysAgo);
+
+  await page.goto('/?view=day');
+  await page.getByRole('button', { name: 'clear the example' }).click();
+  await expect(page.getByLabel('Backup reminder')).toBeHidden();
+
+  // A book of one's own: a project, then an hour on it. An empty book has
+  // nothing to lose, so nothing is said until there is work in it.
+  await page.getByText('Projects and rates').click();
+  await page.getByLabel('code').fill('ACM');
+  await page.getByLabel('project', { exact: true }).fill('Acme rebuild');
+  await page.getByLabel('standard rate', { exact: true }).fill('100');
+  await page.getByRole('button', { name: 'Add project' }).click();
+  await expect(page.getByLabel('Backup reminder')).toBeHidden();
+
+  await page.locator('.band').first().click();
+  await expect(page.getByLabel('Backup reminder')).toContainText('10 days');
+
+  await page.getByRole('button', { name: 'not now' }).click();
+  await expect(page.getByLabel('Backup reminder')).toBeHidden();
+
+  // Dismissing buys a day, not for ever.
+  await page.evaluate(() => {
+    localStorage.setItem('kostenboek.backupDismissed', String(Date.now() - 25 * 3_600_000));
+  });
+  await page.reload();
+  await expect(page.getByLabel('Backup reminder')).toBeVisible();
+});
+
 test('the theme toggle walks system, light and dark', async ({ page }) => {
   await page.goto('/');
   const root = page.locator('html');

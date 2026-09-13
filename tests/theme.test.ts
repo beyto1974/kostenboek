@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { applyTheme, nextTheme } from '../src/ui/theme';
-import { readTheme, writeTheme } from '../src/persistence/preferences';
+import {
+  markDismissed,
+  markExported,
+  readBackupMarks,
+  readTheme,
+  writeTheme
+} from '../src/persistence/preferences';
 
 function fakeRoot() {
   const marks = new Map<string, string>();
@@ -79,5 +85,57 @@ describe('remembering the choice', () => {
     expect(readTheme(blocked)).toBe('auto');
     expect(() => writeTheme('dark', blocked)).not.toThrow();
     expect(readTheme(undefined)).toBe('auto');
+  });
+});
+
+describe('what the browser remembers about backups', () => {
+  const NOW = Date.parse('2026-09-13T10:00:00Z');
+
+  it('stamps the first visit, and keeps that stamp on every visit after it', () => {
+    const storage = fakeStorage();
+
+    expect(readBackupMarks(storage, NOW).firstSeenAt).toBe(NOW);
+    expect(readBackupMarks(storage, NOW + 86_400_000).firstSeenAt).toBe(NOW);
+  });
+
+  it('has nothing exported or dismissed to begin with', () => {
+    const marks = readBackupMarks(fakeStorage(), NOW);
+    expect(marks.lastExportAt).toBeNull();
+    expect(marks.dismissedAt).toBeNull();
+  });
+
+  it('remembers an export and a dismissal', () => {
+    const storage = fakeStorage();
+    readBackupMarks(storage, NOW);
+
+    markExported(NOW + 1000, storage);
+    markDismissed(NOW + 2000, storage);
+
+    const marks = readBackupMarks(storage, NOW + 3000);
+    expect(marks.lastExportAt).toBe(NOW + 1000);
+    expect(marks.dismissedAt).toBe(NOW + 2000);
+  });
+
+  it('forgets a value it cannot read as a moment in time', () => {
+    const storage = fakeStorage({ 'kostenboek.lastExport': 'yesterday' });
+    expect(readBackupMarks(storage, NOW).lastExportAt).toBeNull();
+  });
+
+  it('works in a browser that blocks site data', () => {
+    const blocked = {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {
+        throw new Error('blocked');
+      }
+    } as unknown as Storage;
+
+    expect(readBackupMarks(blocked, NOW)).toEqual({
+      firstSeenAt: NOW,
+      lastExportAt: null,
+      dismissedAt: null
+    });
+    expect(() => markExported(NOW, blocked)).not.toThrow();
   });
 });

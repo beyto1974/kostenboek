@@ -46,6 +46,8 @@ export interface Settings {
 /** Everything the app keeps. One book per browser, exported as one file. */
 export interface Book {
   version: 1;
+  /** True while the book is still the worked example the app opened with. */
+  example?: boolean;
   projects: Project[];
   slots: Record<SlotKey, Slot>;
   days: Record<PlainDate, DayRecord>;

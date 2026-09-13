@@ -53,13 +53,15 @@ export function decodeBook(text: string): Book {
   const projects = candidate['projects'].flatMap(readProject);
   const known = new Set(projects.map((project) => project.id));
 
-  return {
+  const book: Book = {
     version: BOOK_VERSION,
     projects,
     slots: readSlots(candidate['slots'], known),
     days: readDays(candidate['days']),
     settings: readSettings(candidate['settings'])
   };
+  if (candidate['example'] === true) book.example = true;
+  return book;
 }
 
 /** Never throws: unreadable storage simply means nothing was saved. */

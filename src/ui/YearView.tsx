@@ -33,6 +33,14 @@ export function YearView(props: {
   const columns = () => yearColumns(props.app.year());
   const share = (amount: number) => (totals().amount ? `${(amount / totals().amount) * 100}%` : '0%');
   const shift = (years: number) => String(Number(props.app.year()) + years);
+  // A project archived halfway through the year still worked hours in it, and the
+  // table has to add up to the figure beside it.
+  const projectRows = () =>
+    props.app
+      .book()
+      .projects.filter(
+        (project) => !project.archived || (totals().byProject[project.id]?.hours ?? 0) > 0
+      );
 
   return (
     <section class="year">
@@ -108,7 +116,7 @@ export function YearView(props: {
           <h2>per project · whole year</h2>
           <table class="project-table">
             <tbody>
-              <For each={props.app.projects()}>
+              <For each={projectRows()}>
                 {(project) => {
                   const part = () => totals().byProject[project.id] ?? { hours: 0, amount: 0 };
                   return (

@@ -100,20 +100,72 @@ test('the theme toggle walks system, light and dark', async ({ page }) => {
   await expect(root).not.toHaveAttribute('data-theme', /.*/);
 });
 
+/**
+ * A book of two months of 2024, imported rather than generated: the example is
+ * built from the day the test runs, which in a late December or an early January
+ * run would leave the year on screen with one month in it, or none.
+ */
+const TWO_MONTHS = {
+  version: 2,
+  projects: [
+    {
+      id: 'nls',
+      code: 'NLS',
+      name: 'Northside School site',
+      client: 'Northside School',
+      rate: 9000,
+      premiumRate: 14000,
+      color: 'var(--project-1)',
+      archived: false
+    }
+  ],
+  slots: {
+    '2024-03-04T09': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-03-04T10': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-03-05T09': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-11-18T09': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-11-18T10': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-11-18T11': { projectId: 'nls', kind: 'standard', rate: 9000 },
+    '2024-11-18T12': { projectId: 'nls', kind: 'standard', rate: 9000 }
+  },
+  days: {
+    '2024-03-04': { status: 'invoiced', invoiceRef: '2024-007', sentOn: '2024-03-08' },
+    '2024-03-05': { status: 'unbilled' },
+    '2024-11-18': { status: 'paid', invoiceRef: '2024-031', sentOn: '2024-11-20' }
+  },
+  settings: { vatRate: 0.21, dayStart: 8, dayEnd: 20 }
+};
+
+async function openImportedYear(page: import('@playwright/test').Page): Promise<void> {
+  await page.goto('/');
+  await page.locator('#import-file').setInputFiles({
+    name: 'kostenboek-2024.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(TWO_MONTHS))
+  });
+  await expect(page.getByLabel('Example data')).toBeHidden();
+  await page.goto('/?view=year&month=2024-06');
+  await expect(page.locator('.heat-column').first()).toBeVisible();
+}
+
 test('the year overview sums across months and paints a heatmap', async ({ page }) => {
-  await page.goto('/?view=year');
+  await openImportedYear(page);
 
   // A column a week, a square a day: a whole year on one screen.
-  const columns = page.locator('.heat-column');
-  await expect(columns.first()).toBeVisible();
-  expect(await columns.count()).toBeGreaterThanOrEqual(52);
-  await expect(page.locator('.heat.step-4').first()).toBeVisible();
+  expect(await page.locator('.heat-column').count()).toBeGreaterThanOrEqual(52);
+  await expect(page.locator('.heat-grid .heat.step-4')).toHaveCount(1);
 
-  // The example spans more than one month, so the year is more than any of them.
+  // Three hours in March and four in November, which no single month adds up.
   const months = page.locator('.year-months tbody tr:not(.quiet)');
-  expect(await months.count()).toBeGreaterThan(1);
-  await expect(page.locator('.year-months tfoot .right').first()).not.toHaveText('0h');
-  await expect(page.locator('.year .tile.lead .big')).not.toHaveText('€ 0');
+  await expect(months).toHaveCount(2);
+  await expect(page.locator('.year-months tfoot td')).toHaveText([
+    '7h',
+    '€ 630',
+    '€ 90',
+    '€ 180',
+    '€ 360'
+  ]);
+  await expect(page.locator('.year .tile.lead .big')).toHaveText('€ 270');
 
   // A month in the table opens that month on the calendar.
   await months.first().getByRole('button').click();
@@ -122,12 +174,12 @@ test('the year overview sums across months and paints a heatmap', async ({ page 
 });
 
 test('a day in the heatmap opens that day', async ({ page }) => {
-  await page.goto('/?view=year');
+  await openImportedYear(page);
 
-  const worked = page.locator('.heat.step-4').first();
-  const label = (await worked.getAttribute('aria-label')) ?? '';
-  await worked.click();
+  const busiest = page.locator('.heat-grid .heat.step-4');
+  await expect(busiest).toHaveAttribute('aria-label', /^18\/11 · 4h/);
+  await busiest.click();
 
   await expect(page.getByRole('tab', { name: 'Day' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.locator('.day-head h2')).toContainText(label.split(' ·')[0] as string);
+  await expect(page.locator('.day-head h2')).toContainText('18/11');
 });

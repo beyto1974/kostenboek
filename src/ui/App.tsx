@@ -177,12 +177,22 @@ export function App(): JSX.Element {
           </p>
         </div>
         <div class="tools">
-          <button type="button" class="ghost" onClick={() => void app.showMonth(step(app.month(), -1))}>
-            ← previous
-          </button>
-          <button type="button" class="ghost" onClick={() => void app.showMonth(step(app.month(), 1))}>
-            next →
-          </button>
+          <Show when={view() !== 'year'}>
+            <button
+              type="button"
+              class="ghost"
+              onClick={() => void app.showMonth(step(app.month(), -1))}
+            >
+              ← previous
+            </button>
+            <button
+              type="button"
+              class="ghost"
+              onClick={() => void app.showMonth(step(app.month(), 1))}
+            >
+              next →
+            </button>
+          </Show>
           <button type="button" class="ghost" onClick={() => void exportBook()}>
             Export
           </button>

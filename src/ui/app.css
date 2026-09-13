@@ -1144,6 +1144,7 @@ td.money {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  flex: none;
   width: 26px;
   color: var(--ink-3);
   font-family: var(--mono);

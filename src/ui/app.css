@@ -1,0 +1,97 @@
+/*
+ * The palette is declared once on bare :root as the light theme; the dark values
+ * are redefined behind the system setting and again behind an explicit stamp, so
+ * "auto" is the absence of a data-theme attribute rather than a third palette.
+ */
+:root {
+  --paper: #e6e9ed;
+  --card: #fafbfc;
+  --sunk: #dde1e7;
+  --ink: #13161b;
+  --ink-2: #565f6b;
+  --ink-3: #8b95a1;
+  --line: #c3cad3;
+  --line-strong: #9ba4b0;
+  --accent: #1443cf;
+  --paid: #0c6a4a;
+  --invoiced: #9a6805;
+  --unbilled: #5d6673;
+  --project-1: #1443cf;
+  --project-2: #b23c1b;
+  --project-3: #0c6a4a;
+  --project-4: #6a3a9e;
+  --radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0d1015;
+    --card: #151a21;
+    --sunk: #10141a;
+    --ink: #e8ecf1;
+    --ink-2: #9aa5b2;
+    --ink-3: #6b7683;
+    --line: #262d36;
+    --line-strong: #3a4451;
+    --accent: #6b9bff;
+    --paid: #3fbd8c;
+    --invoiced: #e0a83a;
+    --unbilled: #8b95a1;
+    --project-1: #4b7dff;
+    --project-2: #e2703f;
+    --project-3: #25a878;
+    --project-4: #a173e0;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0d1015;
+  --card: #151a21;
+  --sunk: #10141a;
+  --ink: #e8ecf1;
+  --ink-2: #9aa5b2;
+  --ink-3: #6b7683;
+  --line: #262d36;
+  --line-strong: #3a4451;
+  --accent: #6b9bff;
+  --paid: #3fbd8c;
+  --invoiced: #e0a83a;
+  --unbilled: #8b95a1;
+  --project-1: #4b7dff;
+  --project-2: #e2703f;
+  --project-3: #25a878;
+  --project-4: #a173e0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Chivo, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.wrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  max-width: 62ch;
+  color: var(--ink-2);
+  font-size: 13px;
+}

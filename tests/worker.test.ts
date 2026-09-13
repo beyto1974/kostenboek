@@ -29,7 +29,7 @@ describe('opening the book', () => {
     expect(opened.today).toBe('2026-09-13');
     expect(opened.totals.hours).toBe(9);
     expect(opened.weeks).toHaveLength(5);
-    expect(opened.aging.unbilled).toBe(fromEuros(180));
+    expect(opened.aging.unbilled).toBe(fromEuros(200));
     expect(opened.isExample).toBe(false);
   });
 
@@ -108,7 +108,7 @@ describe('changing the book', () => {
 
     const added = await snapshot(handle, {
       kind: 'upsertProject',
-      project: { code: ' krw ', name: '  Harbour   Bakery shop ', client: ' Harbour Bakery ', rate: 8500 }
+      project: { code: ' hrb ', name: '  Harbour   Bakery shop ', client: ' Harbour Bakery ', rate: 8500 }
     });
 
     const project = added.book.projects.at(-1);

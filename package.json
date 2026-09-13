@@ -24,5 +24,11 @@
     "vite": "^6.0.3",
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^4.1.11"
+  },
+  "license": "MIT",
+  "description": "Local-first hour book: paint the hours you worked on a calendar, read what you are still owed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beyto1974/kostenboek.git"
   }
 }

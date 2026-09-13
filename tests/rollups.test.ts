@@ -27,9 +27,9 @@ describe('a day', () => {
     const day = dayTally(exampleBook(), '2026-09-08');
 
     expect(day.hours).toBe(2);
-    expect(day.amount).toBe(fromEuros(75 + 105));
+    expect(day.amount).toBe(fromEuros(80 + 120));
     expect(day.status).toBe('unbilled');
-    expect(day.byProject['tin']).toEqual({ hours: 2, amount: fromEuros(180) });
+    expect(day.byProject['tin']).toEqual({ hours: 2, amount: fromEuros(200) });
   });
 
   it('keeps the two rates apart, so a calendar cell can show them apart', () => {
@@ -56,7 +56,7 @@ describe('a month', () => {
     const month = monthTotals(exampleBook(), '2026-09');
 
     expect(month.hours).toBe(9);
-    expect(month.amount).toBe(fromEuros(4 * 95 + 75 + 105 + 3 * 95));
+    expect(month.amount).toBe(fromEuros(4 * 100 + 80 + 120 + 3 * 100));
     expect(month.vat).toBe(Math.round(month.amount * 0.21));
     expect(month.gross).toBe(month.amount + month.vat);
   });
@@ -64,16 +64,16 @@ describe('a month', () => {
   it('splits the money over the three states it can be in', () => {
     const month = monthTotals(exampleBook(), '2026-09');
 
-    expect(month.byStatus.invoiced).toBe(fromEuros(380));
-    expect(month.byStatus.unbilled).toBe(fromEuros(180));
-    expect(month.byStatus.paid).toBe(fromEuros(285));
-    expect(month.outstanding).toBe(fromEuros(560));
+    expect(month.byStatus.invoiced).toBe(fromEuros(400));
+    expect(month.byStatus.unbilled).toBe(fromEuros(200));
+    expect(month.byStatus.paid).toBe(fromEuros(300));
+    expect(month.outstanding).toBe(fromEuros(600));
   });
 
   it('adds up each project and the average earned per hour', () => {
     const month = monthTotals(exampleBook(), '2026-09');
 
-    expect(month.byProject['nls']).toEqual({ hours: 7, amount: fromEuros(665) });
+    expect(month.byProject['nls']).toEqual({ hours: 7, amount: fromEuros(700) });
     expect(month.averageRate).toBe(Math.round(month.amount / month.hours));
   });
 
@@ -96,9 +96,9 @@ describe('how old the money is', () => {
     const buckets = aging(exampleBook(), '2026-09-13');
 
     // 2026-09-08 is not on an invoice yet.
-    expect(buckets.unbilled).toBe(fromEuros(180));
+    expect(buckets.unbilled).toBe(fromEuros(200));
     // Invoice 2026-013 went out on 31 August: thirteen days ago.
-    expect(buckets.upTo30).toBe(fromEuros(380));
+    expect(buckets.upTo30).toBe(fromEuros(400));
     expect(buckets.upTo60).toBe(0);
     expect(buckets.over60).toBe(0);
     expect(buckets.oldestDays).toBe(13);
@@ -107,13 +107,13 @@ describe('how old the money is', () => {
   it('moves an invoice into the next bucket as it ages', () => {
     const buckets = aging(exampleBook(), '2026-10-05');
     expect(buckets.upTo30).toBe(0);
-    expect(buckets.upTo60).toBe(fromEuros(380));
+    expect(buckets.upTo60).toBe(fromEuros(400));
     expect(buckets.oldestDays).toBe(35);
   });
 
   it('leaves paid work out of it', () => {
     const buckets = aging(exampleBook(), '2026-12-31');
-    expect(buckets.over60).toBe(fromEuros(380));
-    expect(buckets.unbilled).toBe(fromEuros(180));
+    expect(buckets.over60).toBe(fromEuros(400));
+    expect(buckets.unbilled).toBe(fromEuros(200));
   });
 });

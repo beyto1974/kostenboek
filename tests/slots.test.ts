@@ -70,13 +70,13 @@ describe('painting hours', () => {
     const raised = {
       ...book,
       projects: book.projects.map((project) =>
-        project.id === 'nls' ? { ...project, rate: 12000 } : project
+        project.id === 'nls' ? { ...project, rate: 15000 } : project
       )
     };
 
     expect(raised.slots['2026-09-07T09']?.rate).toBe(10000);
     const after = paintSlots(raised, ['2026-09-10T09'], 'nls', 'standard');
-    expect(after.slots['2026-09-10T09']?.rate).toBe(12000);
+    expect(after.slots['2026-09-10T09']?.rate).toBe(15000);
     expect(after.slots['2026-09-07T09']?.rate).toBe(10000);
   });
 

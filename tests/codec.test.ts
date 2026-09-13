@@ -101,7 +101,7 @@ describe('reading a file that is not what it claims', () => {
       projects: [
         {
           id: 'nls',
-          code: ' slb ',
+          code: ' nls ',
           name: '  Northside School site  ',
           client: 'Northside   School',
           rate: 10000,

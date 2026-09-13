@@ -1,8 +1,10 @@
 # kostenboek
 
 An hour book for freelance work. Every hour of the month is a box: paint the hours you
-worked on a project and the money follows from that project's rate — a day rate and an
-evening rate — through to what is still unbilled, what is invoiced, and what has been paid.
+worked on a project and the money follows from that project's rate — each project has two,
+picked by which button you press — through to what is still unbilled, what is invoiced, and
+what has been paid. The rate is written onto the hour as it is booked, so raising a rate
+changes what the next hour is worth and never what is already on an invoice.
 
 Local-first: the book lives in this browser, in IndexedDB, owned by a Web Worker that also
 computes every total. Nothing is sent anywhere. JSON export and import are the way data
@@ -18,6 +20,9 @@ npm run e2e          # browser smoke test (playwright, drives the built app)
 npm run check        # tsc --noEmit
 npm run verify       # all three
 ```
+
+The example the app opens with, and everything in the tests, is invented: the clients,
+the projects and the rates are made up so the screens have something to show.
 
 ## Layout
 
@@ -35,3 +40,7 @@ The UI never touches storage. It sends a request to the worker (`src/worker/prot
 and the worker answers with the whole picture for the month on screen — the book, the
 totals, the week lines and the aging buckets — so a click never has to recompute a total
 on the main thread. The same handler runs inline when a browser will not give us a worker.
+
+## Licence
+
+MIT — see `LICENSE`.

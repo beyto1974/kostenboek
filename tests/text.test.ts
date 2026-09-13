@@ -7,7 +7,7 @@ describe('cleanText', () => {
   });
 
   it('collapses runs of whitespace inside the text', () => {
-    expect(cleanText('Northside   School\tsite')).toBe('Northside School');
+    expect(cleanText('Northside   School\tsite')).toBe('Northside School site');
     expect(cleanText('two\nlines')).toBe('two lines');
   });
 

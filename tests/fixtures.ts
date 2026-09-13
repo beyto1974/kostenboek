@@ -44,15 +44,15 @@ export function exampleBook(): Book {
     version: 2,
     projects: [northside, tinsmith],
     slots: {
-      '2026-09-07T09': day('nls', 95),
-      '2026-09-07T10': day('nls', 95),
-      '2026-09-07T11': day('nls', 95),
-      '2026-09-07T12': day('nls', 95),
-      '2026-09-08T14': day('tin', 75),
+      '2026-09-07T09': day('nls', 100),
+      '2026-09-07T10': day('nls', 100),
+      '2026-09-07T11': day('nls', 100),
+      '2026-09-07T12': day('nls', 100),
+      '2026-09-08T14': day('tin', 80),
       '2026-09-08T19': { projectId: 'tin', kind: 'premium', rate: fromEuros(120) },
-      '2026-09-09T09': day('nls', 95),
-      '2026-09-09T10': day('nls', 95),
-      '2026-09-09T11': day('nls', 95)
+      '2026-09-09T09': day('nls', 100),
+      '2026-09-09T10': day('nls', 100),
+      '2026-09-09T11': day('nls', 100)
     },
     days: {
       '2026-09-07': { status: 'invoiced', invoiceRef: '2026-013', sentOn: '2026-08-31' },

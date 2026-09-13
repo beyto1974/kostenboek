@@ -10,6 +10,7 @@ import { DayView } from './DayView';
 import { ExampleBar } from './ExampleBar';
 import { MatrixView } from './MatrixView';
 import { ProjectPicker } from './ProjectPicker';
+import { ProjectsEditor } from './ProjectsEditor';
 import { ThemeToggle } from './ThemeToggle';
 import { TotalsRail } from './TotalsRail';
 import { monthLabel } from './format';
@@ -189,6 +190,7 @@ export function App(): JSX.Element {
           </div>
           <TotalsRail app={app} />
         </div>
+        <ProjectsEditor app={app} />
       </Show>
     </div>
   );

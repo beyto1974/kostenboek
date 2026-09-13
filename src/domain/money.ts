@@ -20,6 +20,18 @@ export function sumCents(amounts: readonly Cents[]): Cents {
   return total;
 }
 
+/**
+ * An amount as somebody types it: with a comma or a full stop, with or without a
+ * euro sign, and with whatever spacing the keyboard produced.
+ */
+export function parseAmount(typed: string): Cents {
+  const cleaned = typed.replace(/[\s€]/g, '').replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) {
+    throw new RangeError('Write the amount as a number of euros, such as 95 or 95,50.');
+  }
+  return fromEuros(Number(cleaned));
+}
+
 function assertRate(rate: number): void {
   if (!Number.isFinite(rate) || rate < 0 || rate > 1) {
     throw new RangeError('A VAT rate is a fraction between 0 and 1, such as 0.21.');

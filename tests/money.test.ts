@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatEuros, fromEuros, sumCents, toEuros, vatOn, withVat } from '../src/domain/money';
+import { formatEuros, fromEuros, parseAmount, sumCents, toEuros, vatOn, withVat } from '../src/domain/money';
 
 describe('euros and cents', () => {
   it('keeps money as whole cents', () => {
@@ -42,6 +42,27 @@ describe('VAT', () => {
   it('refuses a rate outside 0 to 1', () => {
     expect(() => vatOn(100, 21)).toThrow();
     expect(() => vatOn(100, -0.1)).toThrow();
+  });
+});
+
+describe('reading an amount somebody typed', () => {
+  it('takes a whole number of euros', () => {
+    expect(parseAmount('95')).toBe(10000);
+  });
+
+  it('takes a comma or a full stop for the cents, and spaces around it', () => {
+    expect(parseAmount('95,50')).toBe(9550);
+    expect(parseAmount('  95.5 ')).toBe(9550);
+  });
+
+  it('ignores a euro sign that was typed along with it', () => {
+    expect(parseAmount('€ 110')).toBe(11000);
+  });
+
+  it('says what is wrong with anything else', () => {
+    expect(() => parseAmount('')).toThrow(/amount/i);
+    expect(() => parseAmount('a lot')).toThrow(/amount/i);
+    expect(() => parseAmount('-5')).toThrow(/amount/i);
   });
 });
 

@@ -838,6 +838,108 @@ td.money {
   margin-right: 6px;
 }
 
+/* projects and rates ------------------------------------------------------ */
+
+.projects {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 10px 12px 12px;
+}
+
+.projects summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.project-table.wide {
+  margin-top: 10px;
+}
+
+.project-table.wide th {
+  border-bottom: 1px solid var(--line);
+  padding: 4px 8px 6px 0;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.project-table.wide td {
+  padding: 5px 8px 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.project-table.wide th.right,
+.project-table.wide td.right {
+  text-align: right;
+}
+
+.project-form {
+  margin-top: 12px;
+}
+
+.project-form h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fields input {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 6px 8px;
+  color: var(--ink);
+  font-family: Chivo, sans-serif;
+  font-size: 13.5px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.fields input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.problem {
+  margin: 8px 0 0;
+  color: var(--late);
+  font-size: 12.5px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .slot,
   .band,

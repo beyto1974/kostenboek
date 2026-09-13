@@ -1,7 +1,7 @@
 /*
  * The palette is declared once on bare :root as the light theme; the dark values
  * are redefined behind the system setting and again behind an explicit stamp, so
- * "auto" is the absence of a data-theme attribute rather than a third palette.
+ * "system" is the absence of a data-theme attribute rather than a third palette.
  */
 :root {
   --paper: #e6e9ed;
@@ -16,11 +16,13 @@
   --paid: #0c6a4a;
   --invoiced: #9a6805;
   --unbilled: #5d6673;
+  --late: #a52347;
   --project-1: #1443cf;
   --project-2: #b23c1b;
   --project-3: #0c6a4a;
   --project-4: #6a3a9e;
   --radius: 3px;
+  --mono: 'Chivo Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -37,6 +39,7 @@
     --paid: #3fbd8c;
     --invoiced: #e0a83a;
     --unbilled: #8b95a1;
+    --late: #f2708f;
     --project-1: #4b7dff;
     --project-2: #e2703f;
     --project-3: #25a878;
@@ -57,6 +60,7 @@
   --paid: #3fbd8c;
   --invoiced: #e0a83a;
   --unbilled: #8b95a1;
+  --late: #f2708f;
   --project-1: #4b7dff;
   --project-2: #e2703f;
   --project-3: #25a878;
@@ -76,11 +80,34 @@ body {
   line-height: 1.45;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+[role='tab']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .wrap {
   max-width: 1440px;
   margin: 0 auto;
   padding-inline: 16px;
-  padding-block: 16px;
+  padding-block: 16px 48px;
+}
+
+/* header ------------------------------------------------------------------ */
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 h1 {
@@ -90,8 +117,733 @@ h1 {
   letter-spacing: -0.01em;
 }
 
+h1 span {
+  margin-left: 10px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .sub {
   max-width: 62ch;
+  margin: 4px 0 0;
   color: var(--ink-2);
   font-size: 13px;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ghost {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 5px 10px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.ghost:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.link:hover {
+  color: var(--accent);
+}
+
+.hint {
+  max-width: 78ch;
+  margin: 6px 0 12px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.key {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0 3px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+.example {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  border: 1px solid color-mix(in oklab, var(--invoiced) 45%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--invoiced) 12%, var(--card));
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.example p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.example .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--invoiced);
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 12px;
+  border-left: 3px solid var(--late);
+  background: var(--card);
+  padding: 8px 12px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* project picker ---------------------------------------------------------- */
+
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 5px 10px 5px 7px;
+}
+
+.chip[aria-checked='true'] {
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.chip b {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.chip small {
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: none;
+}
+
+/* tabs -------------------------------------------------------------------- */
+
+.tabs {
+  display: flex;
+  width: fit-content;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.tabs button {
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  padding: 7px 14px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.tabs button:last-child {
+  border-right: 0;
+}
+
+.tabs button[aria-selected='true'] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* calendar ---------------------------------------------------------------- */
+
+.calendar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.calendar-head,
+.calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) 92px;
+}
+
+.calendar-head div {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line-strong);
+  padding: 7px 9px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.calendar-head div:last-child {
+  border-right: 0;
+  background: var(--sunk);
+  text-align: right;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 104px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  padding: 7px 9px 8px;
+  text-align: left;
+}
+
+.cell.empty {
+  background: var(--sunk);
+  cursor: default;
+}
+
+.cell.weekend {
+  background: var(--sunk);
+}
+
+.cell:hover:not(.empty) {
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+
+.cell.selected,
+.cell[aria-current='date'] {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.cell-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cell-day em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cell-day em.unbilled {
+  color: var(--unbilled);
+}
+.cell-day em.invoiced {
+  color: var(--invoiced);
+}
+.cell-day em.paid {
+  color: var(--paid);
+}
+
+.cell-blocks {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.block {
+  display: flex;
+  align-items: center;
+  height: 13px;
+  border-radius: 2px;
+  padding: 0 4px;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cell-total {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-total b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.week {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  background: var(--sunk);
+  padding: 9px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.week b {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .calendar-head,
+  .calendar-row {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .calendar-head div:last-child,
+  .week {
+    display: none;
+  }
+
+  .cell {
+    min-height: 78px;
+    padding: 5px 6px;
+  }
+}
+
+/* month matrix ------------------------------------------------------------ */
+
+.matrix {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow-x: auto;
+}
+
+.matrix table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.matrix th,
+.matrix td {
+  padding: 0;
+  text-align: center;
+}
+
+.matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--card);
+  padding: 7px 0 6px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.matrix .day-column {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 96px;
+  background: var(--card);
+  padding-left: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.matrix thead .day-column {
+  z-index: 4;
+}
+
+.matrix tbody .day-column {
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+}
+
+.matrix tbody tr.weekend .day-column,
+.matrix tbody tr.weekend td {
+  background: var(--sunk);
+}
+
+.matrix tbody tr.today .day-column .link {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.matrix tbody td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.slot {
+  display: block;
+  width: 100%;
+  height: 26px;
+  border: 0;
+  padding: 0;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: crosshair;
+}
+
+.slot:hover {
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+
+.figure {
+  padding: 0 8px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+td.money {
+  border-right: 1px solid var(--line-strong);
+}
+
+.status {
+  min-width: 96px;
+  border: 1px solid currentColor;
+  border-radius: 20px;
+  background: transparent;
+  padding: 1px 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.status.unbilled {
+  color: var(--unbilled);
+}
+.status.invoiced {
+  color: var(--invoiced);
+}
+.status.paid {
+  color: var(--paid);
+}
+
+/* day --------------------------------------------------------------------- */
+
+.day {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.day-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--line-strong);
+  padding: 11px 13px;
+}
+
+.day-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.day-head .figure {
+  padding: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.grow {
+  flex: 1;
+}
+
+.bands {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bands li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.bands li:last-child {
+  border-bottom: 0;
+}
+
+.band-time {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--line);
+  padding: 0 10px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.band {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  padding: 9px 12px;
+  color: var(--ink-2);
+  text-align: left;
+}
+
+.band:hover {
+  background: var(--sunk);
+}
+
+.band.filled {
+  color: #fff;
+}
+
+.band.filled:hover {
+  filter: brightness(1.07);
+}
+
+.band-code {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.band-rate {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.band-empty {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.day-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--line-strong);
+  padding: 11px 13px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* totals rail ------------------------------------------------------------- */
+
+.rail {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tile {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 11px 12px;
+}
+
+.tile.lead {
+  border-left: 3px solid var(--accent);
+}
+
+.tile h2 {
+  margin: 0 0 6px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.big {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.note {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  display: flex;
+  height: 7px;
+  margin-top: 9px;
+  border-radius: 20px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.split li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.split li.late {
+  color: var(--late);
+}
+
+.split .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.split .label {
+  flex: 1;
+  color: var(--ink-2);
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.line.strong {
+  color: var(--ink);
+}
+
+.project-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.project-table td {
+  padding: 3px 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-table td.right {
+  text-align: right;
+}
+
+.project-table .swatch {
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slot,
+  .band,
+  .cell {
+    transition:
+      box-shadow 0.08s,
+      background 0.08s;
+  }
 }

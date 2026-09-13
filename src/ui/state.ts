@@ -79,6 +79,7 @@ export function createBookState(client: BookClient) {
     aging: (): Aging =>
       snapshot()?.aging ?? { unbilled: 0, upTo30: 0, upTo60: 0, over60: 0, oldestDays: 0 },
     dayTally: (): DayTally => tallyOfDay(book(), day() || '2000-01-01'),
+    dayTallyOf: (date: PlainDate): DayTally => tallyOfDay(book(), date),
     slotAt: (key: SlotKey): Slot | undefined => book().slots[key],
     projectOf: (id: ProjectId): Project | undefined =>
       book().projects.find((project) => project.id === id),

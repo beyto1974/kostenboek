@@ -1,35 +1,51 @@
 import { For, type JSX } from 'solid-js';
 import { formatEuros } from '../domain/money';
-import type { Project } from '../domain/types';
+import type { Project, RateKind } from '../domain/types';
 
 /**
- * Which project the next painted hour belongs to. The rates are on the chip
- * itself: picking a project is picking what an hour is worth.
+ * Which project the next painted hour belongs to, and at which of its two rates.
+ * The second rate is a button, not a time of day: nothing about the hour on the
+ * clock decides what the work was worth.
  */
 export function ProjectPicker(props: {
   projects: Project[];
   active: Project | null;
-  onPick: (id: string) => void;
+  activeRate: RateKind;
+  onPick: (id: string, rate: RateKind) => void;
 }): JSX.Element {
+  const chosen = (project: Project, rate: RateKind) =>
+    props.active?.id === project.id && props.activeRate === rate;
+
   return (
-    <div class="picker" role="radiogroup" aria-label="Project">
+    <div class="picker" role="radiogroup" aria-label="Project and rate">
       <For each={props.projects}>
         {(project, index) => (
-          <button
-            type="button"
-            role="radio"
-            class="chip"
-            style={{ color: project.color }}
-            aria-checked={props.active?.id === project.id}
-            onClick={() => props.onPick(project.id)}
-          >
+          <div class="chip" style={{ color: project.color, '--chip': project.color }}>
             <span class="swatch" style={{ background: project.color }} />
             <b>{project.code}</b>
-            <small>
-              {formatEuros(project.rate)}/h · {formatEuros(project.eveningRate)} evening
-            </small>
+            <span class="rates">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={chosen(project, 'standard')}
+                aria-label={`${project.name} at the standard rate`}
+                onClick={() => props.onPick(project.id, 'standard')}
+              >
+                {formatEuros(project.rate)}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                class="second"
+                aria-checked={chosen(project, 'premium')}
+                aria-label={`${project.name} at the second rate`}
+                onClick={() => props.onPick(project.id, 'premium')}
+              >
+                {formatEuros(project.premiumRate)} ★
+              </button>
+            </span>
             <span class="key">{index() + 1}</span>
-          </button>
+          </div>
         )}
       </For>
     </div>

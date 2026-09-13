@@ -48,13 +48,18 @@ describe('the state the views read', () => {
     expect(app.slotAt('2026-09-10T09')?.projectId).toBe('nls');
   });
 
-  it('paints with whichever project is active, at the evening rate when asked', async () => {
+  it('paints with whichever project and rate the picker is on', async () => {
     const app = state();
     await app.open();
-    app.selectProject('tin');
+    app.selectProject('tin', 'premium');
+    expect(app.activeRate()).toBe('premium');
 
-    await app.paint(['2026-09-10T19'], true);
-    expect(app.slotAt('2026-09-10T19')).toEqual({ projectId: 'tin', evening: true });
+    await app.paint(['2026-09-10T19']);
+    expect(app.slotAt('2026-09-10T19')).toEqual({
+      projectId: 'tin',
+      kind: 'premium',
+      rate: 12000
+    });
   });
 
   it('clears an hour that is painted again with the same project', async () => {

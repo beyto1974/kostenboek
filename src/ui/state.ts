@@ -2,7 +2,7 @@ import { createMemo, createSignal } from 'solid-js';
 import { monthOf, type PlainDate, type PlainMonth } from '../domain/dates';
 import { dayTally as tallyOfDay, type Aging, type DayTally, type MonthTotals, type WeekTally } from '../domain/rollups';
 import { emptyBook } from '../persistence/codec';
-import type { Book, DayStatus, Project, ProjectId, Slot, SlotKey } from '../domain/types';
+import type { Book, DayStatus, Project, ProjectId, RateKind, Slot, SlotKey } from '../domain/types';
 import type { BookClient } from '../worker/client';
 import type { ProjectInput, Request, SnapshotResponse } from '../worker/protocol';
 
@@ -21,6 +21,7 @@ export function createBookState(client: BookClient) {
   const [snapshot, setSnapshot] = createSignal<SnapshotResponse | null>(null);
   const [error, setError] = createSignal<string | null>(null);
   const [activeProjectId, setActiveProjectId] = createSignal<ProjectId | null>(null);
+  const [activeRate, setActiveRate] = createSignal<RateKind>('standard');
   const [selectedDay, setSelectedDay] = createSignal<PlainDate | null>(null);
   const [busy, setBusy] = createSignal(false);
 
@@ -85,31 +86,36 @@ export function createBookState(client: BookClient) {
       book().projects.find((project) => project.id === id),
 
     /* what a view can do */
+    activeRate,
     open: () => send({ kind: 'open' }),
     showMonth: (wanted: PlainMonth) => send({ kind: 'view', month: wanted }),
-    selectProject: (id: ProjectId) => setActiveProjectId(id),
+    /** Picking a project also picks which of its two rates the next hour is booked at. */
+    selectProject: (id: ProjectId, rate: RateKind = 'standard') => {
+      setActiveProjectId(id);
+      setActiveRate(rate);
+    },
     selectDay: (date: PlainDate) => {
       setSelectedDay(date);
       if (monthOf(date) !== month()) void send({ kind: 'view', month: monthOf(date) });
     },
 
-    paint: async (slots: SlotKey[], evening = false) => {
+    paint: async (slots: SlotKey[], rate: RateKind = activeRate()) => {
       const project = activeProject();
       if (!project || slots.length === 0) return;
-      await send({ kind: 'paint', slots, projectId: project.id, evening });
+      await send({ kind: 'paint', slots, projectId: project.id, rate });
     },
     clear: (slots: SlotKey[]) => send({ kind: 'clear', slots }),
 
     /** One click on an hour: fill it, or empty it when it already holds this exact booking. */
-    toggle: async (key: SlotKey, evening = false) => {
+    toggle: async (key: SlotKey, rate: RateKind = activeRate()) => {
       const project = activeProject();
       if (!project) return;
       const current = book().slots[key];
-      if (current && current.projectId === project.id && current.evening === evening) {
+      if (current && current.projectId === project.id && current.kind === rate) {
         await send({ kind: 'clear', slots: [key] });
         return;
       }
-      await send({ kind: 'paint', slots: [key], projectId: project.id, evening });
+      await send({ kind: 'paint', slots: [key], projectId: project.id, rate });
     },
 
     advanceDayStatus: (date: PlainDate) => {

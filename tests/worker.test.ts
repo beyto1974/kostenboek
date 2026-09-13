@@ -62,11 +62,15 @@ describe('changing the book', () => {
       kind: 'paint',
       slots: ['2026-09-10T09', '2026-09-10T10'],
       projectId: 'nls',
-      evening: false
+      rate: 'standard'
     });
 
     expect(painted.totals.hours).toBe(11);
-    expect(painted.book.slots['2026-09-10T09']).toEqual({ projectId: 'nls', evening: false });
+    expect(painted.book.slots['2026-09-10T09']).toEqual({
+      projectId: 'nls',
+      kind: 'standard',
+      rate: 10000
+    });
     expect((await store.load())?.slots['2026-09-10T10']).toBeDefined();
   });
 
@@ -113,7 +117,7 @@ describe('changing the book', () => {
       name: 'Harbour Bakery shop',
       client: 'Harbour Bakery',
       rate: 8500,
-      eveningRate: 8500
+      premiumRate: 8500
     });
     expect(project?.id).toBeTruthy();
   });
@@ -124,12 +128,40 @@ describe('changing the book', () => {
 
     const edited = await snapshot(handle, {
       kind: 'upsertProject',
-      project: { id: 'nls', code: 'NLS', name: 'Northside School site', client: 'Northside School', rate: 10000, eveningRate: 14000 }
+      project: {
+        id: 'nls',
+        code: 'NLS',
+        name: 'Northside School site',
+        client: 'Northside School',
+        rate: 10000,
+        premiumRate: 14000
+      }
     });
 
     expect(edited.book.projects).toHaveLength(2);
     expect(edited.book.projects[0]?.rate).toBe(10000);
-    expect(edited.totals.byProject['nls']?.amount).toBe(fromEuros(700));
+  });
+
+  it('a new rate is for the hours still to come, never for the ones already booked', async () => {
+    const { handle } = handler();
+    const before = await snapshot(handle, { kind: 'open' });
+
+    await snapshot(handle, {
+      kind: 'upsertProject',
+      project: { id: 'nls', code: 'NLS', name: 'Northside School site', client: 'Northside School', rate: 20000 }
+    });
+
+    const after = await snapshot(handle, { kind: 'view', month: '2026-09' });
+    expect(after.totals.byProject['nls']?.amount).toBe(before.totals.byProject['nls']?.amount);
+
+    const painted = await snapshot(handle, {
+      kind: 'paint',
+      slots: ['2026-09-10T09'],
+      projectId: 'nls',
+      rate: 'standard'
+    });
+    expect(painted.book.slots['2026-09-10T09']?.rate).toBe(fromEuros(200));
+    expect(painted.book.slots['2026-09-07T09']?.rate).toBe(fromEuros(100));
   });
 
   it('answers with an error a person can read, and keeps the book as it was', async () => {
@@ -171,7 +203,7 @@ describe('files in and out', () => {
     expect(written.kind).toBe('file');
     if (written.kind !== 'file') return;
     expect(written.filename).toBe('kostenboek-2026-09-13.json');
-    expect(written.text).toContain('"version": 1');
+    expect(written.text).toContain(String.raw`"version": 2`);
   });
 
   it('reads a book back in and stops being the example', async () => {

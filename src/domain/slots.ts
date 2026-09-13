@@ -1,6 +1,6 @@
 import { plainDate, type PlainDate } from './dates';
 import { cleanText } from './text';
-import type { Book, DayRecord, DayStatus, ProjectId, SlotKey } from './types';
+import type { Book, DayRecord, DayStatus, ProjectId, RateKind, SlotKey } from './types';
 
 /**
  * The grid is the storage: an hour is either booked to a project or it is not.
@@ -43,22 +43,26 @@ export function slotsOfDay(book: Book, date: PlainDate): SlotKey[] {
     .sort();
 }
 
-/** Books hours to a project, taking over whatever was in them. */
+/**
+ * Books hours to a project at one of its two rates, taking over whatever was in
+ * them. The rate is copied onto the hour as it is booked, so raising a project's
+ * rate tomorrow leaves today's hours — and any invoice they are on — alone.
+ */
 export function paintSlots(
   book: Book,
   keys: readonly SlotKey[],
   projectId: ProjectId,
-  evening: boolean
+  kind: RateKind
 ): Book {
-  if (!book.projects.some((project) => project.id === projectId)) {
-    throw new RangeError(`There is no project "${projectId}" in this book.`);
-  }
+  const project = book.projects.find((candidate) => candidate.id === projectId);
+  if (!project) throw new RangeError(`There is no project "${projectId}" in this book.`);
+  const rate = kind === 'premium' ? project.premiumRate : project.rate;
 
   const slots = { ...book.slots };
   const days = { ...book.days };
   for (const key of keys) {
     const { date } = parseSlot(key);
-    slots[key] = { projectId, evening };
+    slots[key] = { projectId, kind, rate };
     days[date] ??= { status: 'unbilled' };
   }
   return { ...book, slots, days };

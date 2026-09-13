@@ -15,7 +15,7 @@ describe('the book a first-time visitor is shown', () => {
     for (const project of projects) {
       expect(project.code).toMatch(/^[A-Z]{3}$/);
       expect(project.client).not.toBe('');
-      expect(project.eveningRate).toBeGreaterThan(project.rate);
+      expect(project.premiumRate).toBeGreaterThan(project.rate);
     }
   });
 

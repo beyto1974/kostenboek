@@ -16,8 +16,7 @@ import { TotalsRail } from './TotalsRail';
 import { monthLabel } from './format';
 import { createBookState } from './state';
 import { applyTheme } from './theme';
-
-type View = 'calendar' | 'matrix' | 'day';
+import { readLocation, writeLocation, type View } from './url';
 
 const VIEWS: { id: View; label: string }[] = [
   { id: 'calendar', label: 'Calendar' },
@@ -44,11 +43,25 @@ function connect(): BookClient {
 export function App(): JSX.Element {
   const client = connect();
   const app = createBookState(client);
-  const [view, setView] = createSignal<View>('calendar');
+  const opened = readLocation(globalThis.location?.search ?? '');
+  const [view, setView] = createSignal<View>(opened.view);
   const [theme, setTheme] = createSignal<Theme>(readTheme());
   let fileInput: HTMLInputElement | undefined;
 
   createEffect(() => applyTheme(theme()));
+
+  // The address bar follows the screen, so a reload or a bookmark comes back to it.
+  createEffect(() => {
+    if (!app.ready()) return;
+    const search = writeLocation({
+      view: view(),
+      month: app.month(),
+      ...(view() === 'day' ? { day: app.selectedDay() } : {})
+    });
+    if (search !== globalThis.location.search) {
+      globalThis.history.replaceState(null, '', `${globalThis.location.pathname}${search}`);
+    }
+  });
 
   function onKey(event: KeyboardEvent): void {
     if (event.target instanceof HTMLInputElement) return;
@@ -63,7 +76,11 @@ export function App(): JSX.Element {
   }
 
   onMount(() => {
-    void app.open();
+    void app.open().then(() => {
+      // What the link asked for, once there is a book to show it against.
+      if (opened.day) app.selectDay(opened.day);
+      else if (opened.month) void app.showMonth(opened.month);
+    });
     document.addEventListener('keydown', onKey);
   });
   onCleanup(() => {
@@ -154,12 +171,14 @@ export function App(): JSX.Element {
       <ProjectPicker
         projects={app.projects()}
         active={app.activeProject()}
-        onPick={(id) => app.selectProject(id)}
+        activeRate={app.activeRate()}
+        onPick={(id, rate) => app.selectProject(id, rate)}
       />
       <p class="hint">
-        Click fills an hour at the day rate, <span class="key">shift</span>+click at the evening rate
-        (★), and clicking a filled hour again empties it. <span class="key">1</span>–
-        <span class="key">4</span> switches project.
+        Pick a project and one of its two rates — the second rate (★) is a choice, not a time of
+        day. Clicking an hour books it at what is picked; clicking it again empties it. A rate you
+        change later leaves hours already booked as they are.{' '}
+        <span class="key">1</span>–<span class="key">4</span> switches project.
       </p>
 
       <div class="tabs" role="tablist" aria-label="View">

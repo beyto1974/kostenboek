@@ -1,6 +1,6 @@
 import type { PlainDate, PlainMonth } from '../domain/dates';
 import type { Aging, MonthTotals, WeekTally } from '../domain/rollups';
-import type { Book, DayStatus, ProjectId, SlotKey } from '../domain/types';
+import type { Book, DayStatus, ProjectId, RateKind, SlotKey } from '../domain/types';
 
 /** What the UI may send a project's way. Rates are cents; text arrives untrimmed. */
 export interface ProjectInput {
@@ -9,7 +9,7 @@ export interface ProjectInput {
   name: string;
   client?: string;
   rate: number;
-  eveningRate?: number;
+  premiumRate?: number;
   color?: string;
   archived?: boolean;
 }
@@ -17,7 +17,7 @@ export interface ProjectInput {
 export type Request =
   | { kind: 'open'; month?: PlainMonth }
   | { kind: 'view'; month: PlainMonth }
-  | { kind: 'paint'; slots: SlotKey[]; projectId: ProjectId; evening: boolean; month?: PlainMonth }
+  | { kind: 'paint'; slots: SlotKey[]; projectId: ProjectId; rate: RateKind; month?: PlainMonth }
   | { kind: 'clear'; slots: SlotKey[]; month?: PlainMonth }
   | {
       kind: 'setDayStatus';

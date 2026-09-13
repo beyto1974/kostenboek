@@ -43,27 +43,50 @@ describe('slot keys', () => {
 });
 
 describe('painting hours', () => {
-  it('fills hours with a project without touching the book it was given', () => {
+  it('fills hours with a project, writing down the rate they were booked at', () => {
     const before = exampleBook();
-    const after = paintSlots(before, slotRange('2026-09-10', 9, 11), 'nls', false);
+    const after = paintSlots(before, slotRange('2026-09-10', 9, 11), 'nls', 'standard');
 
-    expect(after.slots['2026-09-10T09']).toEqual({ projectId: 'nls', evening: false });
-    expect(after.slots['2026-09-10T10']).toEqual({ projectId: 'nls', evening: false });
+    expect(after.slots['2026-09-10T09']).toEqual({
+      projectId: 'nls',
+      kind: 'standard',
+      rate: 10000
+    });
+    expect(after.slots['2026-09-10T10']?.rate).toBe(10000);
     expect(before.slots['2026-09-10T09']).toBeUndefined();
   });
 
-  it('paints the evening rate when asked', () => {
-    const after = paintSlots(exampleBook(), ['2026-09-10T19'], 'tin', true);
-    expect(after.slots['2026-09-10T19']).toEqual({ projectId: 'tin', evening: true });
+  it('takes the second rate when that is the button that was used', () => {
+    const after = paintSlots(exampleBook(), ['2026-09-10T19'], 'tin', 'premium');
+    expect(after.slots['2026-09-10T19']).toEqual({
+      projectId: 'tin',
+      kind: 'premium',
+      rate: 12000
+    });
+  });
+
+  it('leaves hours already booked at the old rate when the project rate changes', () => {
+    const book = exampleBook();
+    const raised = {
+      ...book,
+      projects: book.projects.map((project) =>
+        project.id === 'nls' ? { ...project, rate: 12000 } : project
+      )
+    };
+
+    expect(raised.slots['2026-09-07T09']?.rate).toBe(10000);
+    const after = paintSlots(raised, ['2026-09-10T09'], 'nls', 'standard');
+    expect(after.slots['2026-09-10T09']?.rate).toBe(12000);
+    expect(after.slots['2026-09-07T09']?.rate).toBe(10000);
   });
 
   it('takes over an hour that already held another project', () => {
-    const after = paintSlots(exampleBook(), ['2026-09-07T09'], 'tin', false);
+    const after = paintSlots(exampleBook(), ['2026-09-07T09'], 'tin', 'standard');
     expect(after.slots['2026-09-07T09']?.projectId).toBe('tin');
   });
 
   it('refuses a project the book does not have', () => {
-    expect(() => paintSlots(exampleBook(), ['2026-09-10T09'], 'nope', false)).toThrow(/nope/);
+    expect(() => paintSlots(exampleBook(), ['2026-09-10T09'], 'nope', 'standard')).toThrow(/nope/);
   });
 
   it('clears hours and forgets a day that is left empty', () => {

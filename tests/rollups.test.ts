@@ -1,12 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import { fromEuros } from '../src/domain/money';
-import { aging, dayTally, monthTotals, rateOf, weekTallies } from '../src/domain/rollups';
+import { aging, dayTally, monthTotals, rateFor, weekTallies } from '../src/domain/rollups';
 import { exampleBook, tinsmith } from './fixtures';
 
 describe('rates', () => {
-  it('takes the evening rate only for an evening hour', () => {
-    expect(rateOf(tinsmith, false)).toBe(fromEuros(80));
-    expect(rateOf(tinsmith, true)).toBe(fromEuros(120));
+  it('reads a project’s two rates by the button that picks them', () => {
+    expect(rateFor(tinsmith, 'standard')).toBe(fromEuros(80));
+    expect(rateFor(tinsmith, 'premium')).toBe(fromEuros(120));
+  });
+
+  it('adds up the rate written on each hour, not the rate the project has now', () => {
+    const book = exampleBook();
+    const raised = {
+      ...book,
+      projects: book.projects.map((project) =>
+        project.id === 'nls' ? { ...project, rate: fromEuros(200) } : project
+      )
+    };
+
+    expect(monthTotals(raised, '2026-09').amount).toBe(monthTotals(book, '2026-09').amount);
   });
 });
 

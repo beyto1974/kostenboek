@@ -5,7 +5,7 @@ import { exampleBook } from './fixtures';
 describe('an empty book', () => {
   it('opens with no work in it and the Belgian VAT rate', () => {
     const book = emptyBook();
-    expect(book.version).toBe(1);
+    expect(book.version).toBe(2);
     expect(book.projects).toEqual([]);
     expect(book.slots).toEqual({});
     expect(book.settings).toEqual({ vatRate: 0.21, dayStart: 8, dayEnd: 20 });
@@ -19,7 +19,40 @@ describe('writing and reading a book', () => {
   });
 
   it('writes JSON a person can read in a text editor', () => {
-    expect(encodeBook(emptyBook())).toContain('\n  "version": 1');
+    expect(encodeBook(emptyBook())).toContain('\n  "version": 2');
+  });
+});
+
+describe('a book written by the first version', () => {
+  const version1 = JSON.stringify({
+    version: 1,
+    projects: [
+      {
+        id: 'nls',
+        code: 'NLS',
+        name: 'Northside School site',
+        client: 'Northside School',
+        rate: 10000,
+        eveningRate: 15000,
+        color: 'var(--project-1)',
+        archived: false
+      }
+    ],
+    slots: {
+      '2026-09-07T09': { projectId: 'nls', evening: false },
+      '2026-09-07T19': { projectId: 'nls', evening: true }
+    },
+    days: { '2026-09-07': { status: 'unbilled' } },
+    settings: { vatRate: 0.21, dayStart: 8, dayEnd: 20 }
+  });
+
+  it('is read, and every hour keeps what it was worth back then', () => {
+    const book = decodeBook(version1);
+
+    expect(book.version).toBe(2);
+    expect(book.projects[0]?.premiumRate).toBe(15000);
+    expect(book.slots['2026-09-07T09']).toEqual({ projectId: 'nls', kind: 'standard', rate: 10000 });
+    expect(book.slots['2026-09-07T19']).toEqual({ projectId: 'nls', kind: 'premium', rate: 15000 });
   });
 });
 
@@ -47,9 +80,9 @@ describe('reading a file that is not what it claims', () => {
     const damaged = {
       ...exampleBook(),
       slots: {
-        '2026-09-07T09': { projectId: 'nls', evening: false },
-        'not-an-hour': { projectId: 'nls', evening: false },
-        '2026-09-07T10': { projectId: 'ghost', evening: false }
+        '2026-09-07T09': { projectId: 'nls', kind: 'standard', rate: 10000 },
+        'not-an-hour': { projectId: 'nls', kind: 'standard', rate: 10000 },
+        '2026-09-07T10': { projectId: 'ghost', kind: 'standard', rate: 10000 }
       }
     };
 
@@ -72,7 +105,7 @@ describe('reading a file that is not what it claims', () => {
           name: '  Northside School site  ',
           client: 'Northside   School',
           rate: 10000,
-          eveningRate: 15000,
+          premiumRate: 15000,
           color: 'var(--project-1)',
           archived: false
         }

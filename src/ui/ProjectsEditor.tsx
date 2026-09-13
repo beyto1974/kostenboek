@@ -13,7 +13,7 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
   const [name, setName] = createSignal('');
   const [client, setClient] = createSignal('');
   const [rate, setRate] = createSignal('');
-  const [evening, setEvening] = createSignal('');
+  const [second, setSecond] = createSignal('');
   const [problem, setProblem] = createSignal<string | null>(null);
 
   function start(project: Project | null): void {
@@ -22,7 +22,7 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
     setName(project?.name ?? '');
     setClient(project?.client ?? '');
     setRate(project ? String(project.rate / 100) : '');
-    setEvening(project ? String(project.eveningRate / 100) : '');
+    setSecond(project ? String(project.premiumRate / 100) : '');
     setProblem(null);
   }
 
@@ -36,7 +36,7 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
         name: name(),
         client: client(),
         rate: parseAmount(rate()),
-        eveningRate: evening().trim() === '' ? parseAmount(rate()) : parseAmount(evening())
+        premiumRate: second().trim() === '' ? parseAmount(rate()) : parseAmount(second())
       });
       start(null);
     } catch (error) {
@@ -54,8 +54,8 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
             <th>code</th>
             <th>project</th>
             <th>client</th>
-            <th class="right">day rate</th>
-            <th class="right">evening</th>
+            <th class="right">standard rate</th>
+            <th class="right">second rate</th>
             <th />
           </tr>
         </thead>
@@ -70,7 +70,7 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
                 <td>{project.name}</td>
                 <td>{project.client}</td>
                 <td class="right">{formatEuros(project.rate)}</td>
-                <td class="right">{formatEuros(project.eveningRate)}</td>
+                <td class="right">{formatEuros(project.premiumRate)}</td>
                 <td class="right">
                   <button type="button" class="link" onClick={() => start(project)}>
                     edit
@@ -114,7 +114,7 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
             />
           </label>
           <label for="project-rate">
-            day rate
+            standard rate
             <input
               id="project-rate"
               value={rate()}
@@ -123,14 +123,14 @@ export function ProjectsEditor(props: { app: BookState }): JSX.Element {
               onInput={(event) => setRate(event.currentTarget.value)}
             />
           </label>
-          <label for="project-evening">
-            evening rate
+          <label for="project-second-rate">
+            second rate
             <input
-              id="project-evening"
-              value={evening()}
+              id="project-second-rate"
+              value={second()}
               inputmode="decimal"
-              placeholder="same as the day rate"
-              onInput={(event) => setEvening(event.currentTarget.value)}
+              placeholder="same as the standard rate"
+              onInput={(event) => setSecond(event.currentTarget.value)}
             />
           </label>
         </div>

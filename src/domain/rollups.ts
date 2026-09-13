@@ -2,7 +2,7 @@ import { eachDayOfMonth, monthGrid, plainDate, type PlainDate, type PlainMonth }
 import type { Cents } from './money';
 import { vatOn } from './money';
 import { parseSlot } from './slots';
-import type { Book, DayStatus, Project, ProjectId, Slot } from './types';
+import type { Book, DayStatus, Project, ProjectId, RateKind, Slot } from './types';
 
 /** Hours and what they are worth — the shape every total in the app takes. */
 export interface Tally {
@@ -41,9 +41,9 @@ export interface Aging {
   oldestDays: number;
 }
 
-/** What one hour of this project is worth, day rate or evening rate. */
-export function rateOf(project: Project, evening: boolean): Cents {
-  return evening ? project.eveningRate : project.rate;
+/** What the next hour of this project would be worth, at either of its two rates. */
+export function rateFor(project: Project, kind: RateKind): Cents {
+  return kind === 'premium' ? project.premiumRate : project.rate;
 }
 
 function add(into: Record<ProjectId, Tally>, id: ProjectId, amount: Cents): void {
@@ -51,14 +51,9 @@ function add(into: Record<ProjectId, Tally>, id: ProjectId, amount: Cents): void
   into[id] = { hours: current.hours + 1, amount: current.amount + amount };
 }
 
-/**
- * The worth of one booked hour. A slot pointing at a project that is no longer in
- * the book counts as nothing rather than breaking the page — an imported file can
- * always be one edit behind.
- */
-function worth(book: Book, slot: Slot): Cents {
-  const project = book.projects.find((candidate) => candidate.id === slot.projectId);
-  return project ? rateOf(project, slot.evening) : 0;
+/** The worth of one booked hour: the rate it was booked at, and nothing since. */
+function worth(slot: Slot): Cents {
+  return slot.rate;
 }
 
 export function dayTally(book: Book, date: PlainDate): DayTally {
@@ -69,7 +64,7 @@ export function dayTally(book: Book, date: PlainDate): DayTally {
 
   for (const [key, slot] of Object.entries(book.slots)) {
     if (!key.startsWith(`${date}T`)) continue;
-    const value = worth(book, slot);
+    const value = worth(slot);
     hours += 1;
     amount += value;
     add(byProject, slot.projectId, value);

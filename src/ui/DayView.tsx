@@ -90,7 +90,7 @@ export function DayView(props: { app: BookState }): JSX.Element {
                   class="band"
                   classList={{ filled: Boolean(slot()) }}
                   style={{ background: project()?.color ?? 'transparent' }}
-                  onClick={(event) => void props.app.toggle(key(), event.shiftKey)}
+                  onClick={() => void props.app.toggle(key())}
                 >
                   <Show
                     when={project()}
@@ -105,11 +105,9 @@ export function DayView(props: { app: BookState }): JSX.Element {
                         <span class="band-code">{found().code}</span>
                         <span>
                           {found().name}
-                          <Show when={slot()?.evening}> · evening rate ★</Show>
+                          <Show when={slot()?.kind === 'premium'}> · second rate ★</Show>
                         </span>
-                        <span class="band-rate">
-                          {formatEuros(slot()?.evening ? found().eveningRate : found().rate)}
-                        </span>
+                        <span class="band-rate">{formatEuros(slot()?.rate ?? 0)}</span>
                       </>
                     )}
                   </Show>

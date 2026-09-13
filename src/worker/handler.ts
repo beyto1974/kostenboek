@@ -74,7 +74,7 @@ export function createHandler({
 
         case 'paint':
           return snapshot(
-            await commit(paintSlots(current, request.slots, request.projectId, request.evening))
+            await commit(paintSlots(current, request.slots, request.projectId, request.rate))
           );
 
         case 'clear':
@@ -117,7 +117,8 @@ function upsert(book: Book, input: ProjectInput): Book {
   const name = requireText(input.name, 'project name');
   const code = requireText(input.code, 'project code', 6).toUpperCase();
   const rate = wholeCents(input.rate, 'hourly rate');
-  const eveningRate = input.eveningRate === undefined ? rate : wholeCents(input.eveningRate, 'evening rate');
+  const premiumRate =
+    input.premiumRate === undefined ? rate : wholeCents(input.premiumRate, 'second rate');
 
   const existing = input.id ? book.projects.find((project) => project.id === input.id) : undefined;
   const project: Project = {
@@ -126,7 +127,7 @@ function upsert(book: Book, input: ProjectInput): Book {
     name,
     client: cleanText(input.client),
     rate,
-    eveningRate,
+    premiumRate,
     color: cleanText(input.color) || existing?.color || nextColor(book),
     archived: input.archived ?? existing?.archived ?? false
   };

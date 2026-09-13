@@ -20,20 +20,20 @@ export function MatrixView(props: { app: BookState; onOpenDay: (date: string) =>
   let painting = false;
   let mode: 'fill' | 'clear' = 'fill';
 
-  function begin(key: string, evening: boolean): void {
+  function begin(key: string): void {
     const current = props.app.slotAt(key);
     const active = props.app.activeProject();
     mode =
-      current && active && current.projectId === active.id && current.evening === evening
+      current && active && current.projectId === active.id && current.kind === props.app.activeRate()
         ? 'clear'
         : 'fill';
     painting = true;
-    apply(key, evening);
+    apply(key);
   }
 
-  function apply(key: string, evening: boolean): void {
+  function apply(key: string): void {
     if (mode === 'clear') void props.app.clear([key]);
-    else void props.app.paint([key], evening);
+    else void props.app.paint([key]);
   }
 
   return (
@@ -85,18 +85,18 @@ export function MatrixView(props: { app: BookState; onOpenDay: (date: string) =>
                             aria-label={`${dayLabel(date)} ${hourLabel(hour)}`}
                             onMouseDown={(event) => {
                               event.preventDefault();
-                              begin(key, event.shiftKey);
+                              begin(key);
                             }}
-                            onMouseEnter={(event) => {
-                              if (painting) apply(key, event.shiftKey);
+                            onMouseEnter={() => {
+                              if (painting) apply(key);
                             }}
                             onKeyDown={(event) => {
                               if (event.key !== 'Enter' && event.key !== ' ') return;
                               event.preventDefault();
-                              void props.app.toggle(key, event.shiftKey);
+                              void props.app.toggle(key);
                             }}
                           >
-                            <Show when={slot()?.evening}>★</Show>
+                            <Show when={slot()?.kind === 'premium'}>★</Show>
                           </button>
                         </td>
                       );

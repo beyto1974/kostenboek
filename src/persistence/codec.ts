@@ -1,9 +1,25 @@
 import { isPlainDate, type PlainDate } from '../domain/dates';
 import { cleanText } from '../domain/text';
-import type { Book, DayRecord, DayStatus, Project, Settings, Slot, SlotKey } from '../domain/types';
+import type {
+  Book,
+  DayRecord,
+  DayStatus,
+  Project,
+  RateKind,
+  Settings,
+  Slot,
+  SlotKey
+} from '../domain/types';
 
-/** The schema this build writes. A file from a later one is not opened. */
-export const BOOK_VERSION = 1;
+/**
+ * The schema this build writes. A file from a later one is not opened; a file
+ * from an earlier one is migrated on the way in.
+ *
+ *  1 → 2  every hour carries the rate it was booked at, and the second rate is a
+ *         choice rather than something the clock decides (`eveningRate` became
+ *         `premiumRate`, `evening: true` became `kind: 'premium'`).
+ */
+export const BOOK_VERSION = 2;
 
 const DEFAULT_SETTINGS: Settings = { vatRate: 0.21, dayStart: 8, dayEnd: 20 };
 const STATUSES: DayStatus[] = ['unbilled', 'invoiced', 'paid'];
@@ -38,7 +54,7 @@ export function decodeBook(text: string): Book {
 
   const candidate = raw as Record<string, unknown>;
   const version = candidate['version'];
-  if (version !== BOOK_VERSION) {
+  if (version !== BOOK_VERSION && version !== 1) {
     if (typeof version === 'number' && version > BOOK_VERSION) {
       throw new BookFormatError(
         `This file is from a newer version of kostenboek (${version}). Update the app, then open it again.`
@@ -51,12 +67,12 @@ export function decodeBook(text: string): Book {
   }
 
   const projects = candidate['projects'].flatMap(readProject);
-  const known = new Set(projects.map((project) => project.id));
+  const byId = new Map(projects.map((project) => [project.id, project]));
 
   const book: Book = {
     version: BOOK_VERSION,
     projects,
-    slots: readSlots(candidate['slots'], known),
+    slots: readSlots(candidate['slots'], byId),
     days: readDays(candidate['days']),
     settings: readSettings(candidate['settings'])
   };
@@ -84,7 +100,8 @@ function readProject(value: unknown): Project[] {
   if (id === '' || name === '' || code === '') return [];
 
   const rate = wholeCents(raw['rate']);
-  const eveningRate = wholeCents(raw['eveningRate']);
+  // 'eveningRate' is what version 1 called the second rate.
+  const premiumRate = wholeCents(raw['premiumRate']) ?? wholeCents(raw['eveningRate']);
   if (rate === null) return [];
 
   return [
@@ -94,14 +111,14 @@ function readProject(value: unknown): Project[] {
       name,
       client: cleanText(raw['client'] as string),
       rate,
-      eveningRate: eveningRate ?? rate,
+      premiumRate: premiumRate ?? rate,
       color: cleanText(raw['color'] as string) || 'var(--project-1)',
       archived: raw['archived'] === true
     }
   ];
 }
 
-function readSlots(value: unknown, known: Set<string>): Record<SlotKey, Slot> {
+function readSlots(value: unknown, projects: Map<string, Project>): Record<SlotKey, Slot> {
   if (typeof value !== 'object' || value === null) return {};
   const slots: Record<SlotKey, Slot> = {};
 
@@ -113,9 +130,19 @@ function readSlots(value: unknown, known: Set<string>): Record<SlotKey, Slot> {
 
     const slot = raw as Record<string, unknown>;
     const projectId = cleanText(slot['projectId'] as string);
-    if (!known.has(projectId)) continue;
+    const project = projects.get(projectId);
+    if (!project) continue;
 
-    slots[key] = { projectId, evening: slot['evening'] === true };
+    // Version 1 held the choice as a flag and no rate at all; the rate the
+    // project has now is the closest thing to what that hour was worth.
+    const kind: RateKind =
+      slot['kind'] === 'premium' || slot['evening'] === true ? 'premium' : 'standard';
+    const stored = wholeCents(slot['rate']);
+    slots[key] = {
+      projectId,
+      kind,
+      rate: stored ?? (kind === 'premium' ? project.premiumRate : project.rate)
+    };
   }
   return slots;
 }

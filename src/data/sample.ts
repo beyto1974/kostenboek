@@ -32,20 +32,29 @@ export function sampleBook(today: PlainDate = todayFrom()): Book {
   const slots: Record<SlotKey, Slot> = {};
   const days: Record<PlainDate, DayRecord> = {};
 
+  const rateOf = (id: string, kind: 'standard' | 'premium'): number => {
+    const project = projects.find((candidate) => candidate.id === id);
+    if (!project) return 0;
+    return kind === 'premium' ? project.premiumRate : project.rate;
+  };
+
   workdays.forEach((date, index) => {
     for (const [id, from, to] of dayPattern(index)) {
-      for (const key of slotRange(date, from, to)) slots[key] = { projectId: id, evening: false };
+      for (const key of slotRange(date, from, to)) {
+        slots[key] = { projectId: id, kind: 'standard', rate: rateOf(id, 'standard') };
+      }
     }
-    // One call-out a fortnight, billed at the evening rate.
+    // One call-out a fortnight, booked at the project's second rate.
     if (index === 2 || index === 11) {
-      slots[slotKey(date, 19)] = { projectId: 'tin', evening: true };
-      slots[slotKey(date, 20)] = { projectId: 'tin', evening: true };
+      const premium = { projectId: 'tin', kind: 'premium' as const, rate: rateOf('tin', 'premium') };
+      slots[slotKey(date, 19)] = premium;
+      slots[slotKey(date, 20)] = { ...premium };
     }
     days[date] = statusFor(index, today);
   });
 
   return {
-    version: 1,
+    version: 2,
     example: true,
     projects,
     slots,
@@ -85,7 +94,7 @@ function project(
   name: string,
   client: string,
   rate: number,
-  eveningRate: number,
+  premiumRate: number,
   color: number
 ): Project {
   return {
@@ -94,7 +103,7 @@ function project(
     name,
     client,
     rate: fromEuros(rate),
-    eveningRate: fromEuros(eveningRate),
+    premiumRate: fromEuros(premiumRate),
     color: `var(--project-${color})`,
     archived: false
   };

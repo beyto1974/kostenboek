@@ -626,6 +626,45 @@ td.money {
   flex: 1;
 }
 
+.invoice-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--sunk);
+  padding: 8px 13px;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.invoice-line input {
+  width: 130px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 4px 7px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.invoice-line input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.invoice-line .note {
+  margin: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 .bands {
   margin: 0;
   padding: 0;

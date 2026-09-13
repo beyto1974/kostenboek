@@ -51,6 +51,31 @@ export function DayView(props: { app: BookState }): JSX.Element {
         </button>
       </header>
 
+      <Show when={tally().hours > 0}>
+        <div class="invoice-line">
+          <label for="invoice-ref">invoice</label>
+          <input
+            id="invoice-ref"
+            value={props.app.book().days[date()]?.invoiceRef ?? ''}
+            placeholder="2026-014"
+            onChange={(event) =>
+              void props.app.setDayStatus(
+                date(),
+                'invoiced',
+                event.currentTarget.value,
+                props.app.book().days[date()]?.sentOn ?? props.app.today()
+              )
+            }
+          />
+          <Show
+            when={props.app.book().days[date()]?.sentOn}
+            fallback={<span class="note">not sent yet</span>}
+          >
+            {(sent) => <span class="note">sent {dayLabel(sent())}</span>}
+          </Show>
+        </div>
+      </Show>
+
       <ul class="bands">
         <For each={hours()}>
           {(hour) => {

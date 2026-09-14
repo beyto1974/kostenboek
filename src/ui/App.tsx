@@ -18,6 +18,7 @@ import { BackupBar } from './BackupBar';
 import { CalendarView } from './CalendarView';
 import { DayView } from './DayView';
 import { ExampleBar } from './ExampleBar';
+import { Mark } from './Mark';
 import { MatrixView } from './MatrixView';
 import { ProjectPicker } from './ProjectPicker';
 import { ProjectsEditor } from './ProjectsEditor';
@@ -167,14 +168,17 @@ export function App(): JSX.Element {
   return (
     <div class="wrap">
       <header class="top">
-        <div>
-          <h1>
-            Kostenboek <span>{monthLabel(app.month())}</span>
-          </h1>
-          <p class="sub">
-            Every hour of the month is a box. Paint the hours you worked; the rate of the project
-            turns them into money, and the rail keeps score of what is still owed to you.
-          </p>
+        <div class="brand">
+          <Mark />
+          <div>
+            <h1>
+              Kostenboek <span>{monthLabel(app.month())}</span>
+            </h1>
+            <p class="sub">
+              Every hour of the month is a box. Paint the hours you worked; the rate of the project
+              turns them into money, and the rail keeps score of what is still owed to you.
+            </p>
+          </div>
         </div>
         <div class="tools">
           <Show when={view() !== 'year'}>

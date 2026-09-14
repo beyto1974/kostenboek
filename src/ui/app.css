@@ -129,6 +129,36 @@ button:focus-visible,
   margin-bottom: 12px;
 }
 
+.brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Nudged down to sit on the cap height of the title rather than its line box. */
+.mark {
+  flex: none;
+  margin-top: 2px;
+}
+
+.mark-booked {
+  fill: var(--accent);
+}
+
+.mark-invoiced {
+  fill: var(--invoiced);
+}
+
+.mark-paid {
+  fill: var(--paid);
+}
+
+.mark-empty {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+
 h1 {
   margin: 0;
   font-size: 20px;

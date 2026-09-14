@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Kostenboek">
+  <title>Kostenboek</title>
+  <!--
+    Uurraster: the k is built out of booked hour cells, twelve of the thirty-five
+    on a 5x7 grid. The two cells at the arm tips carry the state colours the app
+    uses for invoiced and paid. Colours are the ones in src/ui/app.css.
+  -->
+  <style>
+    :root {
+      --accent: #1443cf;
+      --invoiced: #9a6805;
+      --paid: #0c6a4a;
+      --line: #9ba4b0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --accent: #6b9bff;
+        --invoiced: #e0a83a;
+        --paid: #3fbd8c;
+        --line: #3a4451;
+      }
+    }
+    .empty { fill: none; stroke: var(--line); stroke-width: 1.5; }
+    .booked { fill: var(--accent); }
+    .invoiced { fill: var(--invoiced); }
+    .paid { fill: var(--paid); }
+  </style>
+  <!-- The grid is drawn on a 9px pitch and then eased in off the edges, so the
+       mark keeps a margin when it is used as a tile. -->
+  <g transform="translate(3.12 3.1) scale(0.903)">
+  <g class="empty">
+    <rect x="19.75" y="1.75" width="6.5" height="6.5" rx="1" />
+    <rect x="28.75" y="1.75" width="6.5" height="6.5" rx="1" />
+    <rect x="37.75" y="1.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="1.75" width="6.5" height="6.5" rx="1" />
+    <rect x="19.75" y="10.75" width="6.5" height="6.5" rx="1" />
+    <rect x="28.75" y="10.75" width="6.5" height="6.5" rx="1" />
+    <rect x="37.75" y="10.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="10.75" width="6.5" height="6.5" rx="1" />
+    <rect x="19.75" y="19.75" width="6.5" height="6.5" rx="1" />
+    <rect x="28.75" y="19.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="19.75" width="6.5" height="6.5" rx="1" />
+    <rect x="19.75" y="28.75" width="6.5" height="6.5" rx="1" />
+    <rect x="37.75" y="28.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="28.75" width="6.5" height="6.5" rx="1" />
+    <rect x="28.75" y="37.75" width="6.5" height="6.5" rx="1" />
+    <rect x="37.75" y="37.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="37.75" width="6.5" height="6.5" rx="1" />
+    <rect x="19.75" y="46.75" width="6.5" height="6.5" rx="1" />
+    <rect x="37.75" y="46.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="46.75" width="6.5" height="6.5" rx="1" />
+    <rect x="19.75" y="55.75" width="6.5" height="6.5" rx="1" />
+    <rect x="28.75" y="55.75" width="6.5" height="6.5" rx="1" />
+    <rect x="46.75" y="55.75" width="6.5" height="6.5" rx="1" />
+  </g>
+  <g class="booked">
+    <rect x="10" y="1" width="8" height="8" rx="1" />
+    <rect x="10" y="10" width="8" height="8" rx="1" />
+    <rect x="10" y="19" width="8" height="8" rx="1" />
+    <rect x="10" y="28" width="8" height="8" rx="1" />
+    <rect x="10" y="37" width="8" height="8" rx="1" />
+    <rect x="10" y="46" width="8" height="8" rx="1" />
+    <rect x="10" y="55" width="8" height="8" rx="1" />
+    <rect x="28" y="28" width="8" height="8" rx="1" />
+    <rect x="19" y="37" width="8" height="8" rx="1" />
+    <rect x="28" y="46" width="8" height="8" rx="1" />
+  </g>
+  <rect class="invoiced" x="37" y="19" width="8" height="8" rx="1" />
+  <rect class="paid" x="37" y="55" width="8" height="8" rx="1" />
+  </g>
+</svg>

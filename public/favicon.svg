@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Kostenboek">
+  <title>Kostenboek</title>
+  <!--
+    Stempel: one booked hour at full size, with the k cut out of it. This is the
+    mark for the sizes where the hour grid in logo.svg thins out to nothing — a
+    tab, a bookmark, a 32px tile. It carries its own ground, so it holds on a
+    light or a dark tab bar. Colours are the ones in src/ui/app.css.
+  -->
+  <style>
+    :root { --accent: #1443cf; --knock: #fafbfc; }
+    @media (prefers-color-scheme: dark) {
+      :root { --accent: #6b9bff; --knock: #0d1015; }
+    }
+  </style>
+  <rect x="2" y="2" width="60" height="60" rx="4" fill="var(--accent)" />
+  <g fill="var(--knock)" stroke="var(--knock)">
+    <path d="M16 11 h9 v42 h-9 z" stroke="none" />
+    <path d="M26 33.5 L45 14.2 M26 33.5 L44.8 49.8" fill="none" stroke-width="9" />
+  </g>
+</svg>

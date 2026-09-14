@@ -33,6 +33,8 @@ the projects and the rates are made up so the screens have something to show.
 - `src/data/sample.ts` — the worked example a first-time visitor is shown.
 - `tests/`, `e2e/` — unit tests mirroring `src/`, and one browser smoke test.
 - `prototypes/` — the three HTML design studies this app grew out of. Not built.
+- `public/` — the two marks, copied to the site root: `logo.svg` where there is room for the
+  hour grid, `favicon.svg` where there is not.
 
 ## How it fits together
 

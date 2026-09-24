@@ -10,6 +10,9 @@ Local-first: the book lives in this browser, in IndexedDB, owned by a Web Worker
 computes every total. Nothing is sent anywhere. JSON export and import are the way data
 moves between machines or into a backup.
 
+Try it at <https://beyto1974.github.io/kostenboek>. Being local-first, the hosted copy
+keeps its book in your browser too; the page only serves the app.
+
 ## Running it
 
 ```bash
